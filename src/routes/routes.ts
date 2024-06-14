@@ -20,8 +20,7 @@ export const routes = () => {
   router.route("/user-login").post(userLogin)
 
   //user routes
-
-  router.route("/fetch-user").post(fetchData)
+  router.route("/fetch-user").get(fetchData)
 
   //sport routes
   router.route("/add-sport").post(addSport);
