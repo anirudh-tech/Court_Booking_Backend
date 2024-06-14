@@ -8,7 +8,7 @@ import { userController } from "../controllers/userController";
 
 export const routes = () => {
   const { adminLogin,userLogin } = loginController();
-  const { addSport, editSport } = sportController();
+  const { addSport, editSport, listSports } = sportController();
   const { addCourt, editCourt } = courtController();
   const {bookCourt,userBookingList} = bookingController();
   const {fetchData} = userController();
