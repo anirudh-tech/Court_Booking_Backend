@@ -7,7 +7,7 @@ export const sportController = () => {
       try {
         const { sportName } = req.body;
         const sport = await Sport.create({ sportName });
-        return res.json({
+        return res.status(201).json({
           status: true,
           data: sport,
           message: "Sport added",
@@ -34,7 +34,7 @@ export const sportController = () => {
           });
         }
 
-        return res.json({
+        return res.status(200).json({
           status: true,
           data: sport,
           message: "Sport updated",
