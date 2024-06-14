@@ -25,6 +25,7 @@ export const routes = () => {
   //sport routes
   router.route("/add-sport").post(addSport);
   router.route("/edit-sport").patch(editSport);
+  router.route("/list-sports").get(listSports)
 
   //court routes
   router.route("/add-court").post(addCourt);
