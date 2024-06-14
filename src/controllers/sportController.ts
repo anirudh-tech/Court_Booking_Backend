@@ -6,7 +6,12 @@ export const sportController = () => {
     addSport: async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { sportName } = req.body;
-        const sport = await Sport.create({ sportName });
+        let sport;
+        sport = await Sport.findOne({sportName});
+        if(sport){
+          return res.status(400).json({message: "Sport already exists"});
+        }
+        sport = await Sport.create({ sportName });
         return res.status(201).json({
           status: true,
           data: sport,

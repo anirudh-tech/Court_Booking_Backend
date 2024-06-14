@@ -2,11 +2,7 @@ import { Schema, model } from "mongoose";
 
 const MoneySchema = new Schema(
   {
-    weekDays: {
-      type: Number,
-      required: true,
-    },
-    weekEnds: {
+    cost: {
       type: Number,
       required: true,
     },
