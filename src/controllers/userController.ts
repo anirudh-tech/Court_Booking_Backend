@@ -11,7 +11,15 @@ export const userController = () => {
         const decodedValue: any = verifyToken(token)
         if(decodedValue) {
             const user = await User.findOne({_id: decodedValue._id})
-            return user as UserEntity;
+            if(user) {
+              res.status(200).json({
+                status: true,
+                data: user,
+                message: "user fetched"
+              })
+            } else {
+              throw new Error("user not found")
+            }
         } else {
             throw new Error("could not verify user")
         }
