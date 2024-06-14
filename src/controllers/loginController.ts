@@ -24,7 +24,10 @@ export const loginController = () => {
         const { username, password } = req.body;
         const admin: any = await User.findOne({ username });
         if (admin) {
-          console.log("🚀 ~ file: loginController.ts:17 ~ adminLogin: ~ admin:", admin)
+          console.log(
+            "🚀 ~ file: loginController.ts:17 ~ adminLogin: ~ admin:",
+            admin
+          );
           const isMatch: boolean = await bcrypt.compare(
             password,
             admin.password
@@ -64,11 +67,44 @@ export const loginController = () => {
     },
     userLogin: async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const {phoneNumber} = req.body
-        const token = req.header('Authorization')?.split(' ')[1];
+        const { phoneNumber } = req.body;
+        const token: any = req.header("Authorization")?.split(" ")[1];
+        const secretToken = process.env.ACCESS_TOKEN_SECRET;
+        if (secretToken) {
+          const verified = jwt.verify(token, secretToken);
+          let user;
+          if (verified) {
+            user = await User.findOne({ phoneNumber });
+            if (!user) {
+              user = await User.create({ phoneNumber });
+            }
+            let payload = {
+              _id: String(user?._id),
+              phoneNumber: user?.phoneNumber!,
+              role: user?.role,
+            };
+            const accessToken = jwt.sign(
+              payload,
+              String(process.env.ACCESS_TOKEN_SECRET),
+              { expiresIn: "1h" }
+            );
+            res.cookie("user_jwt", accessToken, {
+              httpOnly: true,
+              secure: true,
+              sameSite: "none",
+            });
+            res.json({
+              success: true,
+              data: user,
+              messaege: "User Logged in Successfully",
+            });
+          }
+        } else {
+          throw new Error("Token not found");
+        }
       } catch (error) {
-        
+        next(error);
       }
-    }
+    },
   };
 };
