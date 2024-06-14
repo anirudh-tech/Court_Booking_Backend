@@ -22,8 +22,7 @@ export const bookingController = () => {
     bookCourt: async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { sportId, courtId, date, time, userId, duration, amount } = req.body;
-
-       
+        
         const sport = await Sport.findById(sportId);
         if (!sport) {
           return res.status(404).json({
