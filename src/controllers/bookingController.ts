@@ -76,6 +76,35 @@ export const bookingController = () => {
       }
     },
 
+    validatePayment: async (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => {
+      try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+          req.body;
+        const sha = crypto.createHmac("sha256", keySecret);
+        sha.update(`${razorpay_order_id}|${razorpay_payment_id}`);
+        const digest = sha.digest("hex")
+        if(digest !== razorpay_signature){
+          return res.status(400).json({
+            status:false,
+            message:"Transaction is not legit!"
+          })
+        }
+        const data = {
+          orderId: razorpay_order_id,
+          paymentId: razorpay_payment_id
+        }
+        res.status(200).json({
+          status: true,
+          data,
+          message: "Payment successful"
+        })
+      } catch (error) {}
+    },
+
     userBookingList: async (
       req: Request,
       res: Response,

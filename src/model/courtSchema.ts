@@ -9,6 +9,10 @@ const CourtSchema = new Schema(
     cost: {
       type: Schema.Types.ObjectId,
       ref: "Money"
+    },
+    specialCost: {
+      type: Schema.Types.ObjectId,
+      ref: "SpecialCost"
     }
   },
   {
