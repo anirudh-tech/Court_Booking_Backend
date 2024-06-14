@@ -74,6 +74,7 @@ export const loginController = () => {
         const secretToken = process.env.ACCESS_TOKEN_SECRET;
         if (secretToken) {
           const verified = decodeJWT(token);
+          console.log("🚀 ~ userLogin: ~ verified:", verified.payload);
           let user;
           if (verified) {
             user = await User.findOne({ phoneNumber });
@@ -82,8 +83,6 @@ export const loginController = () => {
             }
             let payload = {
               _id: String(user?._id),
-              phoneNumber: user?.phoneNumber!,
-              role: user?.role,
             };
             const accessToken = jwt.sign(
               payload,
