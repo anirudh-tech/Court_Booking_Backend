@@ -109,7 +109,7 @@ export const loginController = () => {
     },
     logout: (req: Request, res: Response, next: NextFunction) => {
       try {
-        console.log("api calling");
+       
 
         res.clearCookie("user_jwt", {
           httpOnly: true,
