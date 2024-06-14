@@ -21,8 +21,9 @@ export const bookingController = () => {
   return {
     bookCourt: async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const { sportId, courtId, date, time, userId, duration, amount } = req.body;
-        
+        const { sportId, courtId, date, time, userId, duration, amount } =
+          req.body;
+
         const sport = await Sport.findById(sportId);
         if (!sport) {
           return res.status(404).json({
@@ -64,12 +65,33 @@ export const bookingController = () => {
         };
         const order = await razorpay.orders.create(options);
 
-
         return res.json({
           status: true,
           data: booking,
           message: "Booking added",
         });
+      } catch (error) {
+        next(error);
+      }
+    },
+
+    userBookingList: async (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => {
+      try {
+        const { id } = req.params;
+        const bookings = await Booking.find({ userId: id });
+        if (bookings) {
+          res.json({
+            success: true,
+            data: bookings,
+            message: "Bookings fetched successfuly",
+          });
+        } else {
+          throw new Error("No bookings found for this user.");
+        }
       } catch (error) {
         next(error);
       }
