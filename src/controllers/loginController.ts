@@ -66,6 +66,7 @@ export const loginController = () => {
       try {
         const {phoneNumber} = req.body
         const token = req.header('Authorization')?.split(' ')[1];
+        console.log("🚀 ~ userLogin: ~ token:", token)
       } catch (error) {
         
       }
