@@ -20,20 +20,20 @@ export const sportController = () => {
     editSport: async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { sportId, sportName } = req.body;
-    
+
         const sport = await Sport.findByIdAndUpdate(
           sportId,
           { sportName },
           { new: true }
         );
-    
+
         if (!sport) {
           return res.status(404).json({
             status: false,
             message: "Sport not found",
           });
         }
-    
+
         return res.json({
           status: true,
           data: sport,
@@ -42,6 +42,18 @@ export const sportController = () => {
       } catch (error) {
         next(error);
       }
-    },    
+    },
+    listSports: async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const sports = await Sport.find();
+        res.status(200).json({
+          status: true,
+          data: sports,
+          message: "Sports fetched",
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
   };
 };
