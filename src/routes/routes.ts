@@ -10,7 +10,7 @@ export const routes = () => {
   const { adminLogin, userLogin, logout } = loginController();
   const { addSport, editSport, listSports } = sportController();
   const { addCourt, editCourt } = courtController();
-  const { bookCourt, userBookingList } = bookingController();
+  const { bookCourt, userBookingList,validatePayment } = bookingController();
   const { fetchData } = userController();
   const router = Router();
 
@@ -34,6 +34,7 @@ export const routes = () => {
 
   //booking routes
   router.route("/book-court").post(bookCourt);
+  router.route("/validate-payment").post(validatePayment);
   router.route("/user-bookings-list/:id").get(userBookingList);
 
   return router;
