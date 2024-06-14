@@ -26,7 +26,7 @@ export const routes = () => {
   router.route("/edit-court").patch(editCourt);
 
   //booking routes
-  router.route("book-court").post(bookCourt);
+  router.route("/book-court").post(bookCourt);
 
   return router;
 };
