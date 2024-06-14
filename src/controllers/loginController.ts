@@ -108,12 +108,18 @@ export const loginController = () => {
       }
     },
     logout: (req: Request, res: Response, next: NextFunction) => {
-      res.clearCookie("user_jwt", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-      });
-      res.status(200).json({ message: "Logged out" });
+      try {
+        console.log("api calling");
+
+        res.clearCookie("user_jwt", {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+        });
+        res.status(200).json({ message: "Logged out", data: null });
+      } catch (error) {
+        next(error);
+      }
     },
   };
 };

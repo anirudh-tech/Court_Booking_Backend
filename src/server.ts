@@ -22,7 +22,7 @@ app.use(cookieParser());
 app.use("/api", routes());
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err);
+
   const errorResponse = {
     errors: [{ message: err?.message || "Something went wrong" }],
   };
