@@ -29,6 +29,7 @@ export const courtController = () => {
         //   { new: true }
         // );
         const court = new Court(req.body);
+        console.log("🚀 ~ file: courtController.ts:32 ~ addCourt: ~ court:", court) 
         await court.save();
         return res.json({
           status: true,
@@ -82,6 +83,18 @@ export const courtController = () => {
           data: court,
           id: courtId,
           message: "Court updated",
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
+    listCourts: async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const courts = await Court.find();
+        res.status(200).json({
+          status: true,
+          data: courts,
+          message: "Courts fetched",
         });
       } catch (error) {
         next(error);
