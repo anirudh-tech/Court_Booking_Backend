@@ -46,7 +46,7 @@ export const loginController = () => {
               String(process.env.ACCESS_TOKEN_SECRET),
               { expiresIn: "1h" }
             );
-            res.cookie("admin_jwt", accessToken, {
+            res.cookie("user_jwt", accessToken, {
               httpOnly: true,
               secure: true,
               sameSite: "none",

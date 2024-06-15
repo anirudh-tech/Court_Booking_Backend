@@ -1,19 +1,37 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
 const CourtSchema = new Schema(
   {
     courtName: {
       type: String,
       required: true,
+      unique: true,
     },
-    cost: {
-      type: Schema.Types.ObjectId,
-      ref: "Money"
+    sportId: {
+      type: mongoose.Types.ObjectId,
     },
-    specialCost: {
-      type: Schema.Types.ObjectId,
-      ref: "SpecialCost"
-    }
+    normalcost: {
+      price: Number,
+      day: {
+        from: String,
+        to: String,
+      },
+      time: {
+        from: String,
+        to: String,
+      },
+    },
+    specialcost: {
+      type: {
+        type: String,
+        enum: ["day", "time"],
+      },
+      price: Number,
+      diff: {
+        from: String,
+        to: String,
+      },
+    },
   },
   {
     timestamps: true,
@@ -21,3 +39,5 @@ const CourtSchema = new Schema(
 );
 
 export const Court = model("Court", CourtSchema);
+
+
