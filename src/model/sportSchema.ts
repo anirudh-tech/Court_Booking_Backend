@@ -7,12 +7,6 @@ const SportSchema = new Schema(
       required: true,
     },
     image: String,
-    court: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Court",
-      },
-    ],
   },
   {
     timestamps: true,
