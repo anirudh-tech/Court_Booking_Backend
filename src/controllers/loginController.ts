@@ -44,7 +44,7 @@ export const loginController = () => {
             const accessToken = jwt.sign(
               payload,
               String(process.env.ACCESS_TOKEN_SECRET),
-              { expiresIn: "1h" }
+              { expiresIn: "21h" }
             );
             res.cookie("user_jwt", accessToken, {
               httpOnly: true,
@@ -87,7 +87,7 @@ export const loginController = () => {
             const accessToken = jwt.sign(
               payload,
               String(process.env.ACCESS_TOKEN_SECRET),
-              { expiresIn: "1h" }
+              { expiresIn: "21h" }
             );
             res.cookie("user_jwt", accessToken, {
               httpOnly: true,

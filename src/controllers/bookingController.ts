@@ -15,63 +15,69 @@ export const bookingController = () => {
     );
   }
 
-  const razorpay: any = new Razorpay({
+  const razorpay = new Razorpay({
     key_id: keyId,
     key_secret: keySecret,
   });
   return {
     bookCourt: async (req: Request, res: Response, next: NextFunction) => {
       try {
+        console.log("Calling ");
+        
         const { sportId, courtId, date, time, userId, duration, amount } =
-          req.body;
+        req.body;
+        console.log("Calling ",req.body);
 
-        const sport = await Sport.findById(sportId);
-        if (!sport) {
-          return res.status(404).json({
-            status: false,
-            message: "Sport not found",
-          });
-        }
+        // const sport = await Sport.findById(sportId);
+        // if (!sport) {
+        //   return res.status(404).json({
+        //     status: false,
+        //     message: "Sport not found",
+        //   });
+        // }
 
-        const court = await Court.findById(courtId);
-        if (!court) {
-          return res.status(404).json({
-            status: false,
-            message: "Court not found",
-          });
-        }
+        // const court = await Court.findById(courtId);
+        // if (!court) {
+        //   return res.status(404).json({
+        //     status: false,
+        //     message: "Court not found",
+        //   });
+        // }
 
-        const user = await User.findById(userId);
-        if (!user) {
-          return res.status(404).json({
-            status: false,
-            message: "User not found",
-          });
-        }
+        // const user = await User.findById(userId);
+        // if (!user) {
+        //   return res.status(404).json({
+        //     status: false,
+        //     message: "User not found",
+        //   });
+        // }
 
-        const booking = await Booking.create({
-          sportId,
-          courtId,
-          date,
-          time,
-          userId,
-          duration,
-          amount,
-        });
+        // const booking = await Booking.create({
+        //   sportId,
+        //   courtId,
+        //   date,
+        //   time,
+        //   userId,
+        //   duration,
+        //   amount,
+        //   transactionStatus:"Pending"
+        // });
 
-        const options = {
-          amount: amount,
-          currency: "INR",
-          receipt: booking._id,
-        };
+        const options = req.body;
         const order = await razorpay.orders.create(options);
+        console.log("🚀 ~ bookCourt: ~ order:", order)
+        if(!order){
+          throw new Error("Razorpay order err")
+        }
 
         return res.json({
           status: true,
-          data: booking,
+          // data: booking,
+          order,
           message: "Booking added",
         });
       } catch (error) {
+        console.log("🚀 ~ bookCourt: ~ error:", error)
         next(error);
       }
     },
@@ -86,22 +92,22 @@ export const bookingController = () => {
           req.body;
         const sha = crypto.createHmac("sha256", keySecret);
         sha.update(`${razorpay_order_id}|${razorpay_payment_id}`);
-        const digest = sha.digest("hex")
-        if(digest !== razorpay_signature){
+        const digest = sha.digest("hex");
+        if (digest !== razorpay_signature) {
           return res.status(400).json({
-            status:false,
-            message:"Transaction is not legit!"
-          })
+            status: false,
+            message: "Transaction is not legit!",
+          });
         }
         const data = {
           orderId: razorpay_order_id,
-          paymentId: razorpay_payment_id
-        }
+          paymentId: razorpay_payment_id,
+        };
         res.status(200).json({
           status: true,
           data,
-          message: "Payment successful"
-        })
+          message: "Payment successful",
+        });
       } catch (error) {}
     },
 

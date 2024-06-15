@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { routes } from "./routes/routes";
 import cors from "cors";
+import { Court } from "./model/courtSchema";
 dotenv.config();
 
 const app: Application = express();
@@ -29,8 +30,9 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   return res.status(500).json(errorResponse);
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async() => {
   console.log(`Server is running on port ${PORT}`);
+  
 });
 
 export default app;
