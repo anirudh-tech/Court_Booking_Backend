@@ -68,8 +68,8 @@ export const bookingController = () => {
 
         return res.json({
           status: true,
-          data: booking,
-          message: "Booking added",
+          data: order,
+          message: "Order Created in Razorpay",
         });
       } catch (error) {
         next(error);
