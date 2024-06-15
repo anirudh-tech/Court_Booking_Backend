@@ -6,10 +6,13 @@ const SportSchema = new Schema(
       type: String,
       required: true,
     },
-    court : [{
-      type: Schema.Types.ObjectId,
-      ref: "Court",
-    }]
+    image: String,
+    court: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Court",
+      },
+    ],
   },
   {
     timestamps: true,

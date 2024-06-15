@@ -65,8 +65,6 @@ export const courtController = () => {
             });
           }
 
-          if (weekDays) cost.weekDays = weekDays;
-          if (weekEnds) cost.weekEnds = weekEnds;
           if (extra) cost.extra = extra;
 
           await cost.save();

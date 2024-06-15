@@ -8,7 +8,7 @@ import { userController } from "../controllers/userController";
 
 export const routes = () => {
   const { adminLogin, userLogin, logout } = loginController();
-  const { addSport, editSport, listSports } = sportController();
+  const { addSport, editSport, listSports,deleteSport } = sportController();
   const { addCourt, editCourt } = courtController();
   const { bookCourt, userBookingList,validatePayment } = bookingController();
   const { fetchData } = userController();
@@ -27,6 +27,7 @@ export const routes = () => {
   router.route("/add-sport").post(addSport);
   router.route("/edit-sport").patch(editSport);
   router.route("/list-sports").get(listSports);
+  router.route("/delete-sport/:sportId").delete(deleteSport)
 
   //court routes
   router.route("/add-court").post(addCourt);
