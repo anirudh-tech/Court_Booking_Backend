@@ -32,6 +32,7 @@ export const courtController = () => {
         req.body.sportId = new mongoose.Types.ObjectId(req.body.sportId);
         console.log(req.body, "--)");
         const court = new Court(req.body);
+        console.log("🚀 ~ file: courtController.ts:32 ~ addCourt: ~ court:", court) 
         await court.save();
         const courts = await Court.aggregate([
           {
@@ -160,6 +161,18 @@ export const courtController = () => {
         return res
           .status(200)
           .json({ status: true, message: "Success", courtId });
+      } catch (error) {
+        next(error);
+      }
+    },
+    listCourts: async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const courts = await Court.find();
+        res.status(200).json({
+          status: true,
+          data: courts,
+          message: "Courts fetched",
+        });
       } catch (error) {
         next(error);
       }
