@@ -9,7 +9,7 @@ export const sportController = () => {
         let sport;
         sport = await Sport.findOne({ sportName });
         if (sport) {
-          return res.status(400).json({ message: "Sport already exists" });
+          throw new Error("Sport already exists");
         }
         sport = await Sport.create({ sportName, image });
         return res.status(201).json({
