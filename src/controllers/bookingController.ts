@@ -23,10 +23,10 @@ export const bookingController = () => {
     bookCourt: async (req: Request, res: Response, next: NextFunction) => {
       try {
         console.log("Calling ");
-        
+
         const { sportId, courtId, date, time, userId, duration, amount } =
-        req.body;
-        console.log("Calling ",req.body);
+          req.body;
+        console.log("Calling ", req.body);
 
         // const sport = await Sport.findById(sportId);
         // if (!sport) {
@@ -65,9 +65,9 @@ export const bookingController = () => {
 
         const options = req.body;
         const order = await razorpay.orders.create(options);
-        console.log("🚀 ~ bookCourt: ~ order:", order)
-        if(!order){
-          throw new Error("Razorpay order err")
+        console.log("🚀 ~ bookCourt: ~ order:", order);
+        if (!order) {
+          throw new Error("Razorpay order err");
         }
 
         return res.json({
@@ -77,7 +77,7 @@ export const bookingController = () => {
           message: "Booking added",
         });
       } catch (error) {
-        console.log("🚀 ~ bookCourt: ~ error:", error)
+        console.log("🚀 ~ bookCourt: ~ error:", error);
         next(error);
       }
     },
@@ -127,6 +127,28 @@ export const bookingController = () => {
           });
         } else {
           throw new Error("No bookings found for this user.");
+        }
+      } catch (error) {
+        next(error);
+      }
+    },
+
+    listBookingsByDate: async (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => {
+      try {
+        const { date, courtId } = req.body;
+        const bookedSlots = await Booking.find({ courtId, date });
+        if (!bookedSlots) {
+          throw new Error("Cannot find booked slots in this date");
+        } else {
+          res.status(200).json({
+            status: true,
+            data: bookedSlots,
+            message: "Booked slots fetched successfully",
+          });
         }
       } catch (error) {
         next(error);
