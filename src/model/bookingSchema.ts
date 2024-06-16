@@ -3,11 +3,6 @@ import { UserEntity } from "../entity/userEntity";
 
 const BookingSchema = new Schema(
   {
-    sportId: {
-      type: Schema.Types.ObjectId,
-      ref: "Sport",
-      required: true,
-    },
     courtId: {
       type: Schema.Types.ObjectId,
       ref: "Court",
@@ -17,8 +12,8 @@ const BookingSchema = new Schema(
       type: Date,
       required: true,
     },
-    time: {
-      type: Date,
+    startTime: {
+      type: String,
       required: true,
     },
     userId: {
@@ -30,7 +25,7 @@ const BookingSchema = new Schema(
       required: true,
     },
     endTime: {
-      type: Date,
+      type: String,
       require: true,
     },
     status: {
@@ -42,10 +37,14 @@ const BookingSchema = new Schema(
       type: Number,
       required: true,
     },
-    transactionStatus: {
+    paymentStatus: {
       type: String,
       enum:["Pending","Failed","Success"]
     },
+    paymentMethod: {
+      type: String,
+      enum:["Online","Offline"]
+    }
   },
   {
     timestamps: true,

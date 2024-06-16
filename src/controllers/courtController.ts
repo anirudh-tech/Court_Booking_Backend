@@ -3,6 +3,7 @@ import { Sport } from "../model/sportSchema";
 import { Money } from "../model/moneySchema";
 import { Court } from "../model/courtSchema";
 import mongoose from "mongoose";
+import { Booking } from "../model/bookingSchema";
 
 export const courtController = () => {
   return {
@@ -184,5 +185,6 @@ export const courtController = () => {
       }
     },
     getCourtPrice: async () => {},
+    
   };
 };

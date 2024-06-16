@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import { routes } from "./routes/routes";
 import cors from "cors";
 import { Court } from "./model/courtSchema";
+import { Booking } from "./model/bookingSchema";
 dotenv.config();
 
 const app: Application = express();
@@ -31,6 +32,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.listen(PORT, async() => {
+  // await Booking.deleteMany({})
   console.log(`Server is running on port ${PORT}`);
   
 });
