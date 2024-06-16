@@ -9,7 +9,13 @@ import { userController } from "../controllers/userController";
 export const routes = () => {
   const { adminLogin, userLogin, logout } = loginController();
   const { addSport, editSport, listSports, deleteSport } = sportController();
-  const { addCourt, editCourt, listAllcourts, deleteCourt } = courtController();
+  const {
+    addCourt,
+    editCourt,
+    listAllcourts,
+    deleteCourt,
+    getCourtsWithSportId,
+  } = courtController();
   const { bookCourt, userBookingList, validatePayment } = bookingController();
   const { fetchData } = userController();
   const router = Router();
@@ -39,6 +45,7 @@ export const routes = () => {
   router.route("/book-court").post(bookCourt);
   router.route("/validate-payment").post(validatePayment);
   router.route("/user-bookings-list/:id").get(userBookingList);
+  router.post("/getcourt-withsport", getCourtsWithSportId);
 
   return router;
 };

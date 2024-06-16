@@ -8,27 +8,6 @@ export const courtController = () => {
   return {
     addCourt: async (req: Request, res: Response, next: NextFunction) => {
       try {
-        // const { sportId, courtName, weekDays, weekEnds, extra } = req.body;
-        // const cost = await Money.create({
-        //   weekDays,
-        //   weekEnds,
-        //   extra,
-        // });
-
-        // const court = await Court.create({
-        //   courtName,
-        //   cost: cost._id,
-        // });
-
-        // const sport = await Sport.findByIdAndUpdate(
-        //   sportId,
-        //   {
-        //     $push: {
-        //       court: court._id,
-        //     },
-        //   },
-        //   { new: true }
-        // );
         req.body.sportId = new mongoose.Types.ObjectId(req.body.sportId);
         console.log(req.body, "--)");
         const court = new Court(req.body);
@@ -61,6 +40,11 @@ export const courtController = () => {
               },
             },
           },
+          {
+            $addFields: {
+              sport: "$sportdetail._id",
+            },
+          },
         ]);
         return res.json({
           status: true,
@@ -75,7 +59,14 @@ export const courtController = () => {
     editCourt: async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { courtId, data } = req.body;
-        await Court.updateOne({ _id: courtId }, { $set: data });
+
+        console.log("🚀 ~ editCourt: ~ courtId:", req.body);
+
+        await Court.replaceOne(
+          { _id: courtId }, // Filter
+          data, // New document
+          { upsert: true } // Options
+        );
         const court = await Court.aggregate([
           {
             $match: {
@@ -104,11 +95,19 @@ export const courtController = () => {
               },
             },
           },
+          {
+            $addFields: {
+              sport: "$sportdetail._id",
+            },
+          },
         ]);
 
-        return res
-          .status(200)
-          .json({ status: true, message: "Successfull", court });
+        return res.status(200).json({
+          status: true,
+          message: "Successfull",
+          court: court[0],
+          courtId,
+        });
       } catch (error) {
         next(error);
       }
@@ -143,6 +142,11 @@ export const courtController = () => {
               },
             },
           },
+          {
+            $addFields: {
+              sport: "$sportdetail._id",
+            },
+          },
         ]);
         console.log("🚀 ~ listAllcourts: ~ testCourt:", courts);
         return res
@@ -164,5 +168,21 @@ export const courtController = () => {
         next(error);
       }
     },
+    getCourtsWithSportId: async (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => {
+      try {
+        const { sportId } = req.body;
+        const courts = await Court.find({ sportId: sportId });
+        return res
+          .status(200)
+          .json({ status: true, courts, message: "Success" });
+      } catch (err) {
+        next(err);
+      }
+    },
+    getCourtPrice: async () => {},
   };
 };
