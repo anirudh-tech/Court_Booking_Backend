@@ -7,7 +7,15 @@ import { User } from "../model/userSchema";
 import crypto from "crypto";
 export const bookingController = () => {
   const keyId = process.env.RAZORPAY_KEY_ID;
+  console.log(
+    "🚀 ~ file: bookingController.ts:10 ~ bookingController ~ keyId:",
+    keyId
+  );
   const keySecret = process.env.RAZORPAY_SECRET;
+  console.log(
+    "🚀 ~ file: bookingController.ts:12 ~ bookingController ~ keySecret:",
+    keySecret
+  );
 
   if (!keyId || !keySecret) {
     throw new Error(
@@ -23,9 +31,16 @@ export const bookingController = () => {
     bookCourt: async (req: Request, res: Response, next: NextFunction) => {
       try {
         console.log("Calling ");
-
-        const { sportId, courtId, date, time, userId, duration, amount } =
-          req.body;
+        const {
+          courtId,
+          date,
+          startTime,
+          endTime,
+          duration,
+          amount,
+          paymentMethod,
+          userId,
+        } = req.body;
         console.log("Calling ", req.body);
 
         // const sport = await Sport.findById(sportId);
@@ -36,46 +51,71 @@ export const bookingController = () => {
         //   });
         // }
 
-        // const court = await Court.findById(courtId);
-        // if (!court) {
-        //   return res.status(404).json({
-        //     status: false,
-        //     message: "Court not found",
-        //   });
-        // }
-
-        // const user = await User.findById(userId);
-        // if (!user) {
-        //   return res.status(404).json({
-        //     status: false,
-        //     message: "User not found",
-        //   });
-        // }
-
-        // const booking = await Booking.create({
-        //   sportId,
-        //   courtId,
-        //   date,
-        //   time,
-        //   userId,
-        //   duration,
-        //   amount,
-        //   transactionStatus:"Pending"
-        // });
-
-        const options = req.body;
-        const order = await razorpay.orders.create(options);
-        console.log("🚀 ~ bookCourt: ~ order:", order);
-        if (!order) {
-          throw new Error("Razorpay order err");
+        const court = await Court.findById(courtId);
+        if (!court) {
+          return res.status(404).json({
+            status: false,
+            message: "Court not found",
+          });
         }
 
-        return res.json({
-          status: true,
-          // data: booking,
-          order,
-          message: "Booking added",
-        });
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.status(404).json({
+            status: false,
+            message: "User not found",
+          });
+        }
+
+        if (paymentMethod === "Online") {
+          const booking = await Booking.create({
+            courtId,
+            date,
+            startTime,
+            endTime,
+            userId,
+            duration,
+            amount,
+            paymentStatus: "Pending",
+            paymentMethod,
+            status:"Booked"
+          });
+  
+          const options = {
+            amount: req.body.amount,
+            currency: "INR",
+            receipt: `#${booking._id} ${userId} ${courtId}`,
+          };
+          const order = await razorpay.orders.create(options);
+          const bookingId = booking._id
+          console.log("🚀 ~ bookCourt: ~ order:", order);
+          if (!order) {
+            throw new Error("Razorpay order err");
+          }
+          return res.json({
+            status: true,
+            order,
+            bookingId,
+            message: "Order created",
+          });
+        } else {
+          const booking = await Booking.create({
+            courtId,
+            date,
+            startTime,
+            endTime,
+            userId,
+            duration,
+            amount,
+            paymentStatus: "Pending",
+            paymentMethod,
+          });
+          return res.json({
+            status: true,
+            data: booking,
+            message: "Booking added",
+          });
+        }
       } catch (error) {
         console.log("🚀 ~ bookCourt: ~ error:", error);
         next(error);
@@ -88,27 +128,30 @@ export const bookingController = () => {
       next: NextFunction
     ) => {
       try {
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-          req.body;
+        console.log(
+          "🚀 ~ file: bookingController.ts:114 ~ bookingController ~ req.body:",
+          req.body
+        );
+        const { razorpayOrderId, razorpayPaymentId, razorpaySignature, bookingId } =
+          req.body.data;
         const sha = crypto.createHmac("sha256", keySecret);
-        sha.update(`${razorpay_order_id}|${razorpay_payment_id}`);
+        sha.update(`${razorpayOrderId}|${razorpayPaymentId}`);
         const digest = sha.digest("hex");
-        if (digest !== razorpay_signature) {
+        if (digest !== razorpaySignature) {
           return res.status(400).json({
             status: false,
             message: "Transaction is not legit!",
           });
         }
-        const data = {
-          orderId: razorpay_order_id,
-          paymentId: razorpay_payment_id,
-        };
+        const data = await Booking.findByIdAndUpdate(bookingId,{status:"Booked",paymentStatus:"Success"},{new: true})
         res.status(200).json({
           status: true,
           data,
           message: "Payment successful",
         });
-      } catch (error) {}
+      } catch (error) {
+        next(error);
+      }
     },
 
     userBookingList: async (
