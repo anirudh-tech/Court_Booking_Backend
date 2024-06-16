@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { Sport } from "../model/sportSchema";
+import { Court } from "../model/courtSchema";
 
 export const sportController = () => {
   return {
@@ -62,6 +63,10 @@ export const sportController = () => {
     deleteSport: async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { sportId } = req.params;
+        let court = await Court.findOne({ sportId: sportId });
+        if(court){
+          throw new Error("Court exist with this sport")
+        }
         await Sport.deleteOne({ _id: sportId });
         return res.status(200).json({
           status: true,

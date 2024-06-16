@@ -31,16 +31,20 @@ const BookingSchema = new Schema(
     },
     endTime: {
       type: Date,
-      require: true
+      require: true,
     },
     status: {
       type: String,
-      enum: ["Booked", "RequestingCancel", "Cancelled", "Played","Pending"],
+      enum: ["Booked", "RequestingCancel", "Cancelled", "Played", "Pending"],
       default: "Pending",
     },
     amount: {
       type: Number,
       required: true,
+    },
+    transactionStatus: {
+      type: String,
+      enum:["Pending","Failed","Success"]
     },
   },
   {

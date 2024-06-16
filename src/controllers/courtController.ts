@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Sport } from "../model/sportSchema";
 import { Money } from "../model/moneySchema";
 import { Court } from "../model/courtSchema";
+import mongoose from "mongoose";
 
 export const courtController = () => {
   return {
@@ -28,12 +29,42 @@ export const courtController = () => {
         //   },
         //   { new: true }
         // );
+        req.body.sportId = new mongoose.Types.ObjectId(req.body.sportId);
+        console.log(req.body, "--)");
         const court = new Court(req.body);
-        console.log("🚀 ~ file: courtController.ts:32 ~ addCourt: ~ court:", court) 
         await court.save();
+        const courts = await Court.aggregate([
+          {
+            $match: {
+              _id: court._id,
+            },
+          },
+          {
+            $lookup: {
+              from: "sports",
+              localField: "sportId",
+              foreignField: "_id",
+              as: "sportdetail",
+            },
+          },
+          {
+            $unwind: "$sportdetail",
+          },
+          {
+            $set: {
+              sportId: {
+                $concat: [
+                  "$sportdetail.sportName",
+                  "[(*)]",
+                  "$sportdetail.image",
+                ],
+              },
+            },
+          },
+        ]);
         return res.json({
           status: true,
-          data: court,
+          data: courts[0],
           message: "Court added",
         });
       } catch (error) {
@@ -44,58 +75,91 @@ export const courtController = () => {
     editCourt: async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { courtId, data } = req.body;
-
-        // const court = await Court.findById(courtId);
-
-        // if (!court) {
-        //   return res.status(404).json({
-        //     status: false,
-        //     message: "Court not found",
-        //   });
-        // }
-
-        // if (courtName) {
-        //   court.courtName = courtName;
-        // }
-
-        // if (weekDays || weekEnds || extra) {
-        //   const cost = await Money.findById(court.cost);
-
-        //   if (!cost) {
-        //     return res.status(404).json({
-        //       status: false,
-        //       message: "Cost details not found",
-        //     });
-        //   }
-
-        //   if (extra) cost.extra = extra;
-
-        //   await cost.save();
-        // }
-
-        // await court.save();
-
         await Court.updateOne({ _id: courtId }, { $set: data });
-        const court = await Court.findById(courtId);
+        const court = await Court.aggregate([
+          {
+            $match: {
+              _id: new mongoose.Types.ObjectId(courtId),
+            },
+          },
+          {
+            $lookup: {
+              from: "sports",
+              localField: "sportId",
+              foreignField: "_id",
+              as: "sportdetail",
+            },
+          },
+          {
+            $unwind: "$sportdetail",
+          },
+          {
+            $set: {
+              sportId: {
+                $concat: [
+                  "$sportdetail.sportName",
+                  "[(*)]",
+                  "$sportdetail.image",
+                ],
+              },
+            },
+          },
+        ]);
 
-        return res.json({
-          status: true,
-          data: court,
-          id: courtId,
-          message: "Court updated",
-        });
+        return res
+          .status(200)
+          .json({ status: true, message: "Successfull", court });
       } catch (error) {
         next(error);
       }
     },
-    listCourts: async (req: Request, res: Response, next: NextFunction) => {
+    listAllcourts: async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const courts = await Court.find();
-        res.status(200).json({
-          status: true,
-          data: courts,
-          message: "Courts fetched",
-        });
+        console.log("API cl");
+
+        // const courts = await Court.find();
+
+        console.log("🚀 ~ listAllcourts: ~ courts:", Sport.collection.name);
+        const courts = await Court.aggregate([
+          {
+            $lookup: {
+              from: "sports",
+              localField: "sportId",
+              foreignField: "_id",
+              as: "sportdetail",
+            },
+          },
+          {
+            $unwind: "$sportdetail",
+          },
+          {
+            $set: {
+              sportId: {
+                $concat: [
+                  "$sportdetail.sportName",
+                  "[(*)]",
+                  "$sportdetail.image",
+                ],
+              },
+            },
+          },
+        ]);
+        console.log("🚀 ~ listAllcourts: ~ testCourt:", courts);
+        return res
+          .status(200)
+          .json({ status: true, data: courts, message: "success" });
+      } catch (error) {
+        console.log("🚀 ~ listAllcourts: ~ error:", error);
+        next(error);
+      }
+    },
+    deleteCourt: async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { courtId } = req.params;
+        await Court.deleteOne({ _id: courtId });
+        return res
+          .status(200)
+          .json({ status: true, message: "Success", courtId });
       } catch (error) {
         next(error);
       }

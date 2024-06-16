@@ -22,7 +22,7 @@ const CourtSchema = new Schema(
       },
     },
     specialcost: {
-      type: {
+      category: {
         type: String,
         enum: ["day", "time"],
       },
