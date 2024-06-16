@@ -17,7 +17,7 @@ const BookingSchema = new Schema(
       type: Date,
       required: true,
     },
-    time: {
+    startTime: {
       type: Date,
       required: true,
     },
