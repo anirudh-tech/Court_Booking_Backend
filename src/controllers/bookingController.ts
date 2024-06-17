@@ -232,5 +232,23 @@ export const bookingController = () => {
         next(error);
       }
     },
+    bookedSlots: async (req: Request, res: Response, next: NextFunction) => {
+      const { courtId, date } = req.body;
+      try {
+        const bookings = await Booking.find({
+          courtId: courtId,
+          date: new Date(date),
+          status: { $ne: "Cancelled" },
+        }).select("startTime duration");
+
+        res.status(200).json({
+          success: true,
+          data: bookings,
+          message: "Booked Slots fetched successfully"
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
   };
 };

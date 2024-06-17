@@ -48,6 +48,7 @@ export const routes = () => {
   router.post("/getcourt-withsport", getCourtsWithSportId);
   router.route("/list-bookings").get(listAllBookings)
   router.route("/bookings-list-by-date").post(listBookingsByDate);
+  router.route("/booked-slots").post()
 
   return router;
 };
