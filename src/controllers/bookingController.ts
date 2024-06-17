@@ -70,9 +70,9 @@ export const bookingController = () => {
             message: "User not found",
           });
         }
-        
+
         console.log("calling3");
-        
+
         if (paymentMethod === "Online") {
           console.log("calling4");
           const booking = await Booking.create({
@@ -89,7 +89,7 @@ export const bookingController = () => {
           });
 
           const options = {
-            amount: amount*100,
+            amount: amount * 100,
             currency: "INR",
             receipt: `#${booking._id}`,
           };
@@ -203,6 +203,29 @@ export const bookingController = () => {
             status: true,
             data: bookedSlots,
             message: "Booked slots fetched successfully",
+          });
+        }
+      } catch (error) {
+        next(error);
+      }
+    },
+
+    listAllBookings: async (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => {
+      try {
+        const bookings = await Booking.find()
+          .populate("courtId")
+          .populate("userId");
+        if (!bookings) {
+          throw new Error("No bookings found");
+        } else {
+          res.status(200).json({
+            success: true,
+            data: bookings,
+            message: "All bookings fetched successfully",
           });
         }
       } catch (error) {
