@@ -9,6 +9,7 @@ const CourtSchema = new Schema(
     },
     sportId: {
       type: mongoose.Types.ObjectId,
+      ref:'Sport'
     },
     normalcost: {
       price: Number,
