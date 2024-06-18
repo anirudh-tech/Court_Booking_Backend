@@ -6,6 +6,7 @@ import Razorpay from "razorpay";
 import { User } from "../model/userSchema";
 import crypto from "crypto";
 import mongoose from "mongoose";
+import { generateTimeSlots } from "../utils/generateTimeslot";
 export const bookingController = () => {
   const keyId = process.env.RAZORPAY_KEY_ID;
   console.log(
@@ -235,17 +236,100 @@ export const bookingController = () => {
     bookedSlots: async (req: Request, res: Response, next: NextFunction) => {
       const { courtId, date } = req.body;
       try {
+        console.log(req.body);
+
+        const startDate = new Date(date);
+        startDate.setHours(0, 0, 0, 0); // Start of the day
+        const endDate = new Date(date);
+        endDate.setHours(23, 59, 59, 999); // End of the day
+
         const bookings = await Booking.find({
           courtId: courtId,
-          date: new Date(date),
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
           status: { $ne: "Cancelled" },
         }).select("startTime duration");
-
-        res.status(200).json({
-          success: true,
-          data: bookings,
-          message: "Booked Slots fetched successfully"
+        // Collect all time slots into a single array
+        const allStartTimeSlots = bookings.flatMap((booking) => {
+          return generateTimeSlots(booking.startTime, booking.duration).slice(
+            0,
+            1
+          ); // Only take the start time
         });
+
+        // Remove duplicates and sort the slots
+        const uniqueSortedSlots = Array.from(new Set(allStartTimeSlots)).sort(
+          (a, b) => {
+            const dateA = new Date(`1970-01-01T${a}`);
+            const dateB = new Date(`1970-01-01T${b}`);
+            return dateA.getTime() - dateB.getTime();
+          }
+        );
+        console.log(
+          "🚀 ~ bookedSlots: ~ uniqueSortedSlots:",
+          uniqueSortedSlots
+        );
+
+        return res.status(200).json({
+          success: true,
+          data: uniqueSortedSlots,
+          message: "Booked Slots fetched successfully",
+        });
+      } catch (error) {
+        next(error);
+      }
+    },
+
+    getBookingsByUser: async (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => {
+      try {
+        const { userId } = req.params;
+        const booking = await Booking.aggregate([
+          {
+            $match: { userId: new mongoose.Types.ObjectId(userId) },
+          },
+          {
+            $lookup: {
+              from: Court.collection.name,
+              localField: "courtId",
+              foreignField: "_id",
+              as: "courtDetail",
+            },
+          },
+          {
+            $unwind: "$courtDetail",
+          },
+          {
+            $lookup: {
+              from: Sport.collection.name,
+              localField: "courtDetail.sportId",
+              foreignField: "_id",
+              as: "sportDetail",
+            },
+          },
+          {
+            $unwind: "$sportDetail",
+          },
+          {
+            $set: {
+              courtId: {
+                $concat: [
+                  "$courtDetail.courtName",
+                  "[(*)]",
+                  "$sportDetail.sportName",
+                ],
+              },
+            },
+          },
+        ]);
+        return res
+          .status(200)
+          .json({ status: true, message: "Success", booking });
       } catch (error) {
         next(error);
       }
