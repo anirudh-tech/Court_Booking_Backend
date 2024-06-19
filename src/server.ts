@@ -11,7 +11,7 @@ const app: Application = express();
 
 const PORT: number = Number(process.env.PORT) || 3000;
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: "https://lal-sports-academy-git-client-anirudhs-projects-6a2748bf.vercel.app",
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
 };
