@@ -152,10 +152,16 @@ export const bookingController = () => {
         if (digest !== razorpaySignature) {
           throw new Error("Transaction is not legit!");
         }
-        await Booking.updateOne(
-          { _id: new mongoose.Types.ObjectId(bookingId) },
-          { $set: { status: "Booked", paymentStatus: "Success" } }
-        );
+        await Booking.aggregate([
+          {
+            $match: { _id: new mongoose.Types.ObjectId(bookingId) },
+          },
+          {
+            $set: {
+              paymentStatus: "Success",
+              status: "Booked",
+            },
+          }])
         const data = await Booking.findOne({ _id: bookingId });
         res.status(200).json({
           status: true,
