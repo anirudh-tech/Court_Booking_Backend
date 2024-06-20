@@ -158,8 +158,8 @@ export const bookingController = () => {
           },
           {
             $set: {
-              status: "Booked",
               paymentStatus: "Success",
+              status: "Booked",
             },
           }])
         const data = await Booking.findOne({ _id: bookingId });
