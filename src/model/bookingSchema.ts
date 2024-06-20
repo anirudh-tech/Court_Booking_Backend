@@ -39,7 +39,6 @@ const BookingSchema = new Schema(
     },
     paymentStatus: {
       type: String,
-      enum:["Pending","Failed","Success"]
     },
     paymentMethod: {
       type: String,
