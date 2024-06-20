@@ -152,11 +152,11 @@ export const bookingController = () => {
         if (digest !== razorpaySignature) {
           throw new Error("Transaction is not legit!");
         }
-        const data = await Booking.findByIdAndUpdate(
-          bookingId,
-          { status: "Booked", paymentStatus: "Success" },
-          { new: true }
+        await Booking.updateOne(
+          { _id: new mongoose.Types.ObjectId(bookingId) },
+          { $set: { status: "Booked", paymentStatus: "Success" } }
         );
+        const data = await Booking.findOne({ _id: bookingId });
         res.status(200).json({
           status: true,
           data,
@@ -174,8 +174,10 @@ export const bookingController = () => {
     ) => {
       try {
         const { id } = req.params;
-        const bookings = await Booking.find({ userId: id }).populate("courtId").populate("courtId.sportId")
-        console.log("🚀 ~ bookingController ~ bookings:", bookings)
+        const bookings = await Booking.find({ userId: id })
+          .populate("courtId")
+          .populate("courtId.sportId");
+        console.log("🚀 ~ bookingController ~ bookings:", bookings);
         if (bookings) {
           res.json({
             success: true,
@@ -243,6 +245,9 @@ export const bookingController = () => {
         startDate.setHours(0, 0, 0, 0); // Start of the day
         const endDate = new Date(date);
         endDate.setHours(23, 59, 59, 999); // End of the day
+
+        // he just give the thumbsumb
+
 
         const bookings = await Booking.find({
           courtId: courtId,
