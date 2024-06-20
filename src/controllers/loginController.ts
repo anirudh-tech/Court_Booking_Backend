@@ -11,13 +11,18 @@ import { decodeJWT } from "../utils/decodeFrontEndjwt";
 export const loginController = () => {
   return {
     // addAdmin: async (req: Request, res: Response, next: NextFunction) => {
-    //   let { username, password, role } = req.body;
-    //   req.body.password = await hash(password, await genSalt(10));
-    //   const admin = await User.create(req.body)
-    //   res.json({
-    //     data: admin,
-    //     message: "admin added"
-    //   })
+    //   try {
+    //     let { username, password, role } = req.body;
+    //     req.body.password = await hash(password, await genSalt(10));
+    //     const admin = await User.create(req.body)
+    //     res.json({
+    //       data: admin,
+    //       message: "admin added"
+    //     })
+        
+    //   } catch (error) {
+    //     next(error)
+    //   }
     // },
 
     adminLogin: async (req: Request, res: Response, next: NextFunction) => {
