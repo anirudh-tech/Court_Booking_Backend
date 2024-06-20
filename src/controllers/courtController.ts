@@ -184,7 +184,8 @@ export const courtController = () => {
         next(err);
       }
     },
-    getCourtPrice: async () => {},
-    
+    getCourtPrice: async () => {
+      
+    },
   };
 };
