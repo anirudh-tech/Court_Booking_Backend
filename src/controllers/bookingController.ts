@@ -145,7 +145,7 @@ export const bookingController = () => {
           razorpayPaymentId,
           razorpaySignature,
           bookingId,
-        } = req.body.data;
+        } = req.body;
         const sha = crypto.createHmac("sha256", keySecret);
         sha.update(`${razorpayOrderId}|${razorpayPaymentId}`);
         const digest = sha.digest("hex");
