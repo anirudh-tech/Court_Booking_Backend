@@ -174,7 +174,7 @@ export const bookingController = () => {
     ) => {
       try {
         const { id } = req.params;
-        const bookings = await Booking.find({ userId: id });
+        const bookings = await Booking.find({ userId: id }).populate("courtId").populate("courtId.sportId")
         if (bookings) {
           res.json({
             success: true,
