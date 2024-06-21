@@ -447,13 +447,16 @@ export const bookingController = () => {
       try {
         const { date } = req.body;
         const startDate = new Date(date);
+        startDate.setDate(startDate.getDate() + 1);
+        startDate.setUTCHours(0, 0, 0, 0);
         console.log(
           "🚀 ~ file: bookingController.ts:390 ~ bookingsByDate: ~ startDate:",
           startDate
         );
-        startDate.setHours(0, 0, 0, 0); // Start of the day
         const endDate = new Date(date);
-        endDate.setHours(23, 59, 59, 999);
+        endDate.setDate(endDate.getDate() + 1);
+        endDate.setUTCHours(23, 59, 59, 999);
+        console.log("🚀 ~ file: bookingController.ts:482 ~ bookingsByDate: ~ endDate:", endDate)
         const bookings = await Booking.find({
           date: {
             $gte: startDate,
