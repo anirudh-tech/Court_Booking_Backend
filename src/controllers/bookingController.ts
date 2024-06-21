@@ -75,6 +75,9 @@ export const bookingController = () => {
 
         console.log("calling3");
 
+        date = new Date(date);
+        date.setDate(date.getDate() + 1);
+
         if (paymentMethod === "Online") {
           console.log("calling4");
           const booking = await Booking.create({
@@ -118,6 +121,7 @@ export const bookingController = () => {
             amount,
             paymentStatus: "Pending",
             paymentMethod,
+            status: "Booked",
           });
           return res.json({
             status: true,
