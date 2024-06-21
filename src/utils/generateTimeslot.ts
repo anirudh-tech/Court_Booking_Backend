@@ -25,8 +25,6 @@ export const generateTimeSlots = (
     slots.push(format(start, "h:mm aa"));
     start = addMinutes(start, 30);
   }
-
-  console.log("🚀 ~ generateTimeSlots ~ slots:", slots);
   mainArray.push(slots);
   return slots;
 };
