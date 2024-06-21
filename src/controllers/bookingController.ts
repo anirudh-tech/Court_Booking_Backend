@@ -7,6 +7,7 @@ import { User } from "../model/userSchema";
 import crypto from "crypto";
 import mongoose from "mongoose";
 import { generateTimeSlots } from "../utils/generateTimeslot";
+import { format } from "date-fns";
 export const bookingController = () => {
   const keyId = process.env.RAZORPAY_KEY_ID;
   console.log(
@@ -226,9 +227,69 @@ export const bookingController = () => {
       next: NextFunction
     ) => {
       try {
-        const bookings = await Booking.find()
-          .populate("courtId")
-          .populate("userId");
+        const { search } = req.query;
+        let bookings;
+        if (search) {
+          const [courts, users] = await Promise.all([
+            Court.find({}),
+            User.find({}),
+          ]);
+          const courtNamesRegex = courts.map((court) => court.courtName);
+          console.log(
+            "🚀 ~ file: bookingController.ts:238 ~ bookingController ~ courtNamesRegex:",
+            courtNamesRegex
+          );
+          const phoneNumbersRegex = users.map((user) => user.phoneNumber);
+
+          const regexFilters = {
+            $or: [
+              {
+                "courtId.courtName": {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+              {
+                "userId.phoneNumber": {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+            ],
+          };
+          bookings = await Booking.aggregate([
+            {
+              $lookup: {
+                from: Court.collection.name,
+                localField: "courtId",
+                foreignField: "_id",
+                as: "courtId",
+              },
+            },
+            {
+              $unwind: "$courtId",
+            },
+            {
+              $lookup: {
+                from: User.collection.name,
+                localField: "userId",
+                foreignField: "_id",
+                as: "userId",
+              },
+            },
+            {
+              $unwind: "$userId",
+            },
+            {
+              $match: regexFilters
+            },
+          ]);
+        } else {
+          bookings = await Booking.find()
+            .populate("courtId")
+            .populate("userId");
+        }
+
         if (!bookings) {
           throw new Error("No bookings found");
         } else {
@@ -377,6 +438,44 @@ export const bookingController = () => {
           data,
           message: "Payment method updated successfully",
         });
+      } catch (error) {
+        next(error);
+      }
+    },
+
+    bookingsByDate: async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { date } = req.body;
+        const startDate = new Date(date);
+        console.log(
+          "🚀 ~ file: bookingController.ts:390 ~ bookingsByDate: ~ startDate:",
+          startDate
+        );
+        startDate.setHours(0, 0, 0, 0); // Start of the day
+        const endDate = new Date(date);
+        endDate.setHours(23, 59, 59, 999);
+        const bookings = await Booking.find({
+          date: {
+            $gte: startDate,
+            $lte: endDate,
+          },
+          status: { $ne: "Cancelled" },
+        })
+          .populate("courtId")
+          .populate("userId");
+        console.log(
+          "🚀 ~ file: bookingController.ts:394 ~ bookingController ~ bookings:",
+          bookings
+        );
+        if (!bookings) {
+          throw new Error("Cannot find booked slots in this date");
+        } else {
+          res.status(200).json({
+            status: true,
+            data: bookings,
+            message: "Booked slots fetched successfully",
+          });
+        }
       } catch (error) {
         next(error);
       }
