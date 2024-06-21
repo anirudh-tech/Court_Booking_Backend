@@ -185,9 +185,40 @@ export const bookingController = () => {
     ) => {
       try {
         const { id } = req.params;
-        const bookings = await Booking.find({ userId: id })
-          .populate("courtId")
-          .populate("courtId.sportId");
+        // const bookings = await Booking.find({ userId: id })
+        //   .populate("courtId")
+        //   .populate("courtId.sportId");
+
+        const bookings = await Booking.aggregate([
+          {
+            $match:{
+              userId: new mongoose.Types.ObjectId(id)
+            },
+
+          },
+          {
+            $lookup:{
+              from: Court.collection.name,
+              localField: "courtId",
+              foreignField: "_id",
+              as: "courtId"
+            }
+          },
+          {
+            $unwind: "$courtId"
+          },
+          {
+            $lookup:{
+              from: Sport.collection.name,
+              localField: "courtId.sportId",
+              foreignField: "_id",
+              as: "sportDetails"
+            }
+          },
+          {
+            $unwind: "$sportDetails"
+          },
+        ])
         console.log("🚀 ~ bookingController ~ bookings:", bookings);
         if (bookings) {
           res.json({
