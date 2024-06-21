@@ -44,6 +44,7 @@ export const bookingController = () => {
           paymentMethod,
           userId,
           sport,
+          totalAmount
         } = req.body;
 
         courtId = new mongoose.Types.ObjectId(courtId);
@@ -78,6 +79,13 @@ export const bookingController = () => {
         date = new Date(date);
         date.setDate(date.getDate() + 1);
         console.log("calling4");
+        let paymentStatus;
+        if(paymentMethod === "Full Payment"){
+          paymentStatus = "Paid";
+        }else{
+          paymentStatus = "Advance Paid";
+        }
+        console.log("🚀 ~ file: bookingController.ts:124 ~ bookCourt: ~ paymentStatus:", paymentStatus)
         const booking = await Booking.create({
           courtId,
           date,
@@ -85,10 +93,11 @@ export const bookingController = () => {
           endTime,
           userId,
           duration,
-          amount,
-          paymentStatus: "Pending",
+          amountPaid: amount,
+          paymentStatus,
           paymentMethod,
           status: "Booked",
+          totalAmount
         });
 
         const options = {
@@ -139,12 +148,6 @@ export const bookingController = () => {
         await Booking.updateOne(
           { _id: new mongoose.Types.ObjectId(bookingId) },
           { $set: { status: "Booked" } }
-        );
-
-        // Second update: Set the paymentStatus to "Success"
-        await Booking.updateOne(
-          { _id: new mongoose.Types.ObjectId(bookingId) },
-          { $set: { paymentStatus: "Success" } }
         );
         const data = await Booking.findOne({ _id: bookingId });
         res.status(200).json({

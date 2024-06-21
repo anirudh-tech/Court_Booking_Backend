@@ -33,7 +33,7 @@ const BookingSchema = new Schema(
       enum: ["Booked", "RequestingCancel", "Cancelled", "Played", "Pending"],
       default: "Pending",
     },
-    amount: {
+    amountPaid: {
       type: Number,
       required: true,
     },
@@ -43,6 +43,9 @@ const BookingSchema = new Schema(
     paymentMethod: {
       type: String,
       enum:["Full Payment","Advance Payment"]
+    },
+    totalAmount: {
+      type: Number
     }
   },
   {
