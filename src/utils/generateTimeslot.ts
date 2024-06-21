@@ -1,6 +1,10 @@
-import { format, addMinutes } from 'date-fns';
+import { format, addMinutes } from "date-fns";
 
-export const generateTimeSlots = (startTime: string, duration: number): string[] => {
+export const mainArray: string[][] = [];
+export const generateTimeSlots = (
+  startTime: string,
+  duration: number
+): string[] => {
   const slots: string[] = [];
   const matchResult = startTime.match(/(\d+):(\d+) (\w+)/);
 
@@ -10,12 +14,19 @@ export const generateTimeSlots = (startTime: string, duration: number): string[]
 
   const [hours, minutes, period] = matchResult.slice(1, 4);
   let start = new Date();
-  start.setHours(period === 'PM' && hours !== '12' ? parseInt(hours) + 12 : parseInt(hours), parseInt(minutes), 0, 0);
+  start.setHours(
+    period === "PM" && hours !== "12" ? parseInt(hours) + 12 : parseInt(hours),
+    parseInt(minutes),
+    0,
+    0
+  );
 
   for (let i = 0; i < duration * 2; i++) {
-    slots.push(format(start, 'h:mm aa'));
+    slots.push(format(start, "h:mm aa"));
     start = addMinutes(start, 30);
   }
 
+  console.log("🚀 ~ generateTimeSlots ~ slots:", slots);
+  mainArray.push(slots);
   return slots;
 };

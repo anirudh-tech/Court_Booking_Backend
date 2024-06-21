@@ -6,7 +6,7 @@ import Razorpay from "razorpay";
 import { User } from "../model/userSchema";
 import crypto from "crypto";
 import mongoose from "mongoose";
-import { generateTimeSlots } from "../utils/generateTimeslot";
+import { generateTimeSlots, mainArray } from "../utils/generateTimeslot";
 import { format } from "date-fns";
 export const bookingController = () => {
   const keyId = process.env.RAZORPAY_KEY_ID;
@@ -191,34 +191,33 @@ export const bookingController = () => {
 
         const bookings = await Booking.aggregate([
           {
-            $match:{
-              userId: new mongoose.Types.ObjectId(id)
+            $match: {
+              userId: new mongoose.Types.ObjectId(id),
             },
-
           },
           {
-            $lookup:{
+            $lookup: {
               from: Court.collection.name,
               localField: "courtId",
               foreignField: "_id",
-              as: "courtId"
-            }
+              as: "courtId",
+            },
           },
           {
-            $unwind: "$courtId"
+            $unwind: "$courtId",
           },
           {
-            $lookup:{
+            $lookup: {
               from: Sport.collection.name,
               localField: "courtId.sportId",
               foreignField: "_id",
-              as: "sportDetails"
-            }
+              as: "sportDetails",
+            },
           },
           {
-            $unwind: "$sportDetails"
+            $unwind: "$sportDetails",
           },
-        ])
+        ]);
         console.log("🚀 ~ bookingController ~ bookings:", bookings);
         if (bookings) {
           res.json({
@@ -316,7 +315,7 @@ export const bookingController = () => {
               $unwind: "$userId",
             },
             {
-              $match: regexFilters
+              $match: regexFilters,
             },
           ]);
         } else {
@@ -341,27 +340,40 @@ export const bookingController = () => {
     bookedSlots: async (req: Request, res: Response, next: NextFunction) => {
       const { courtId, date } = req.body;
       try {
-        console.log(req.body);
-
         const startDate = new Date(date);
         startDate.setHours(0, 0, 0, 0); // Start of the day
         const endDate = new Date(date);
         endDate.setHours(23, 59, 59, 999); // End of the day
 
-        // he just give the thumbsumb
-
-        // Hello everyone my name is mohammed aflah I am basically
-
-        const bookings = await Booking.find({
-          courtId: courtId,
-          date: {
-            $gte: startDate,
-            $lte: endDate,
+        const dio = await Booking.aggregate([
+          {
+            $match: {
+              courtId: new mongoose.Types.ObjectId(courtId),
+              status: { $ne: "Cancelled" },
+            },
           },
-          status: { $ne: "Cancelled" },
-        }).select("startTime duration");
+          {
+            $project: {
+              courtId: 1,
+              startTime: 1,
+              duration: 1,
+              year: { $year: "$date" },
+              month: { $month: "$date" },
+              day: { $dayOfMonth: "$date" },
+            },
+          },
+          {
+            $match: {
+              year: new Date(date).getFullYear(),
+              month: new Date(date).getMonth() + 1,
+              day: new Date(date).getDate() + 1,
+            },
+          },
+        ]);
+
+        console.log("🚀 ~ bookedSlots: ~ dio:", dio);
         // Collect all time slots into a single array
-        const allStartTimeSlots = bookings.flatMap((booking) => {
+        const allStartTimeSlots = dio.flatMap((booking) => {
           return generateTimeSlots(booking.startTime, booking.duration).slice(
             0,
             1
@@ -378,12 +390,12 @@ export const bookingController = () => {
         );
         console.log(
           "🚀 ~ bookedSlots: ~ uniqueSortedSlots:",
-          uniqueSortedSlots
+          mainArray.flat(Infinity)
         );
 
         return res.status(200).json({
           success: true,
-          data: uniqueSortedSlots,
+          data: mainArray.flat(Infinity),
           message: "Booked Slots fetched successfully",
         });
       } catch (error) {
@@ -491,7 +503,10 @@ export const bookingController = () => {
         const endDate = new Date(date);
         endDate.setDate(endDate.getDate() + 1);
         endDate.setUTCHours(23, 59, 59, 999);
-        console.log("🚀 ~ file: bookingController.ts:482 ~ bookingsByDate: ~ endDate:", endDate)
+        console.log(
+          "🚀 ~ file: bookingController.ts:482 ~ bookingsByDate: ~ endDate:",
+          endDate
+        );
         const bookings = await Booking.find({
           date: {
             $gte: startDate,

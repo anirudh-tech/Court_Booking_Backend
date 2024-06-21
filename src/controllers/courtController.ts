@@ -10,7 +10,7 @@ export const courtController = () => {
     addCourt: async (req: Request, res: Response, next: NextFunction) => {
       try {
         req.body.sportId = new mongoose.Types.ObjectId(req.body.sportId);
-        console.log(req.body, "--)");
+        
         const court = new Court(req.body);
         await court.save();
         const courts = await Court.aggregate([
@@ -61,7 +61,7 @@ export const courtController = () => {
       try {
         const { courtId, data } = req.body;
 
-        console.log("🚀 ~ editCourt: ~ courtId:", req.body);
+        
 
         await Court.replaceOne(
           { _id: courtId }, // Filter
@@ -115,11 +115,10 @@ export const courtController = () => {
     },
     listAllcourts: async (req: Request, res: Response, next: NextFunction) => {
       try {
-        console.log("API cl");
+        
 
         // const courts = await Court.find();
 
-        console.log("🚀 ~ listAllcourts: ~ courts:", Sport.collection.name);
         const courts = await Court.aggregate([
           {
             $lookup: {
@@ -149,12 +148,12 @@ export const courtController = () => {
             },
           },
         ]);
-        console.log("🚀 ~ listAllcourts: ~ testCourt:", courts);
+  
         return res
           .status(200)
           .json({ status: true, data: courts, message: "success" });
       } catch (error) {
-        console.log("🚀 ~ listAllcourts: ~ error:", error);
+       
         next(error);
       }
     },
