@@ -42,7 +42,7 @@ const BookingSchema = new Schema(
     },
     paymentMethod: {
       type: String,
-      enum:["FullPayment","AdvancePayment"]
+      enum:["Full Payment","Advance Payment"]
     }
   },
   {

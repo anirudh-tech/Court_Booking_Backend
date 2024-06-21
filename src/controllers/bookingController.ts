@@ -77,58 +77,37 @@ export const bookingController = () => {
 
         date = new Date(date);
         date.setDate(date.getDate() + 1);
+        console.log("calling4");
+        const booking = await Booking.create({
+          courtId,
+          date,
+          startTime,
+          endTime,
+          userId,
+          duration,
+          amount,
+          paymentStatus: "Pending",
+          paymentMethod,
+          status: "Booked",
+        });
 
-        if (paymentMethod === "Online") {
-          console.log("calling4");
-          const booking = await Booking.create({
-            courtId,
-            date,
-            startTime,
-            endTime,
-            userId,
-            duration,
-            amount,
-            paymentStatus: "Pending",
-            paymentMethod,
-            status: "Booked",
-          });
-
-          const options = {
-            amount: amount * 100,
-            currency: "INR",
-            receipt: `#${booking._id}`,
-          };
-          const order = await razorpay.orders.create(options);
-          const bookingId = booking._id;
-          console.log("🚀 ~ bookCourt: ~ order:", order);
-          if (!order) {
-            throw new Error("Razorpay order err");
-          }
-          return res.json({
-            status: true,
-            order,
-            bookingId,
-            message: "Order created",
-          });
-        } else {
-          const booking = await Booking.create({
-            courtId,
-            date,
-            startTime,
-            endTime,
-            userId,
-            duration,
-            amount,
-            paymentStatus: "Pending",
-            paymentMethod,
-            status: "Booked",
-          });
-          return res.json({
-            status: true,
-            data: booking,
-            message: "Booking added",
-          });
+        const options = {
+          amount: amount * 100,
+          currency: "INR",
+          receipt: `#${booking._id}`,
+        };
+        const order = await razorpay.orders.create(options);
+        const bookingId = booking._id;
+        console.log("🚀 ~ bookCourt: ~ order:", order);
+        if (!order) {
+          throw new Error("Razorpay order err");
         }
+        return res.json({
+          status: true,
+          order,
+          bookingId,
+          message: "Order created",
+        });
       } catch (error) {
         console.log("🚀 ~ bookCourt: ~ error:", error);
         next(error);
