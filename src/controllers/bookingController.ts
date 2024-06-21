@@ -156,7 +156,7 @@ export const bookingController = () => {
           { _id: new mongoose.Types.ObjectId(bookingId) },
           { $set: { status: "Booked" } }
         );
-      
+
         // Second update: Set the paymentStatus to "Success"
         await Booking.updateOne(
           { _id: new mongoose.Types.ObjectId(bookingId) },
@@ -254,8 +254,7 @@ export const bookingController = () => {
 
         // he just give the thumbsumb
 
-        // Hello everyone my name is mohammed aflah I am basically 
-
+        // Hello everyone my name is mohammed aflah I am basically
 
         const bookings = await Booking.find({
           courtId: courtId,
@@ -344,6 +343,40 @@ export const bookingController = () => {
         return res
           .status(200)
           .json({ status: true, message: "Success", booking });
+      } catch (error) {
+        next(error);
+      }
+    },
+
+    updatePaymentMethod: async (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => {
+      const { bookingId, value: paymentStatus } = req.body;
+      console.log(
+        "🚀 ~ file: bookingController.ts:353 ~ updatePaymentMethod: ~ req.body:",
+        req.body
+      );
+      try {
+        const result = await Booking.updateOne(
+          { _id: bookingId },
+          { $set: { paymentStatus } },
+          { new: true }
+        );
+        console.log(
+          "🚀 ~ file: bookingController.ts:360 ~ updatePaymentMethod: ~ result:",
+          result
+        );
+
+        const data = await Booking.find()
+          .populate("courtId")
+          .populate("userId");
+        return res.status(200).json({
+          success: true,
+          data,
+          message: "Payment method updated successfully",
+        });
       } catch (error) {
         next(error);
       }

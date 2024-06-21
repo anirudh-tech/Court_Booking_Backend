@@ -16,7 +16,15 @@ export const routes = () => {
     deleteCourt,
     getCourtsWithSportId,
   } = courtController();
-  const { bookCourt, userBookingList, validatePayment,listBookingsByDate,listAllBookings,bookedSlots } = bookingController();
+  const {
+    bookCourt,
+    userBookingList,
+    validatePayment,
+    listBookingsByDate,
+    listAllBookings,
+    bookedSlots,
+    updatePaymentMethod,
+  } = bookingController();
   const { fetchData } = userController();
   const router = Router();
 
@@ -46,9 +54,10 @@ export const routes = () => {
   router.route("/validate-payment").post(validatePayment);
   router.route("/user-bookings-list/:id").get(userBookingList);
   router.post("/getcourt-withsport", getCourtsWithSportId);
-  router.route("/list-bookings").get(listAllBookings)
+  router.route("/list-bookings").get(listAllBookings);
   router.route("/bookings-list-by-date").post(listBookingsByDate);
-  router.route("/booked-slots").post(bookedSlots)
+  router.route("/booked-slots").post(bookedSlots);
+  router.route("/update-payment-status").post(updatePaymentMethod);
 
   return router;
 };
