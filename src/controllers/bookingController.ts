@@ -157,10 +157,10 @@ export const bookingController = () => {
           if (booking?.paymentMethod == "Full Payment") {
             booking.paymentStatus = "Paid";
           } else {
-            booking.paymentStatus = "Advance Paid"
+            booking.paymentStatus = "Advance Paid";
           }
-          booking.status = "Booked"
-          booking.save()
+          booking.status = "Booked";
+          booking.save();
         }
         // await Booking.updateOne(
         //   { _id: new mongoose.Types.ObjectId(bookingId) },
@@ -513,16 +513,17 @@ export const bookingController = () => {
     bookingsByDate: async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { date } = req.body;
+        // startDate.setDate(startDate.getDate() + 1);
         const startDate = new Date(date);
-        startDate.setDate(startDate.getDate() + 1);
-        startDate.setUTCHours(0, 0, 0, 0);
+        startDate.setUTCHours(18, 30, 0, 0);
         console.log(
           "🚀 ~ file: bookingController.ts:390 ~ bookingsByDate: ~ startDate:",
           startDate
         );
         const endDate = new Date(date);
-        endDate.setDate(endDate.getDate() + 1);
-        endDate.setUTCHours(23, 59, 59, 999);
+        endDate.setUTCDate(endDate.getUTCDate() + 1); // Move to the next day
+        endDate.setUTCHours(18, 29, 59, 999);
+        // endDate.setDate(endDate.getDate() + 1);
         console.log(
           "🚀 ~ file: bookingController.ts:482 ~ bookingsByDate: ~ endDate:",
           endDate
@@ -534,7 +535,12 @@ export const bookingController = () => {
           },
           status: { $ne: "Cancelled" },
         })
-          .populate("courtId")
+          .populate({
+            path: "courtId",
+            populate: {
+              path: "sportId",
+            },
+          })
           .populate("userId");
         console.log(
           "🚀 ~ file: bookingController.ts:394 ~ bookingController ~ bookings:",
