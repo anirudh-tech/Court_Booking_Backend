@@ -6,8 +6,15 @@ import Razorpay from "razorpay";
 import { User } from "../model/userSchema";
 import crypto from "crypto";
 import mongoose from "mongoose";
-import { generateTimeSlots, mainArray } from "../utils/generateTimeslot";
+import { generateTimeSlots } from "../utils/generateTimeslot";
 import { format } from "date-fns";
+
+const convertUTCToIST = (date: Date) => {
+  const utcDate = new Date(date);
+  utcDate.setHours(utcDate.getHours() + 5);
+  utcDate.setMinutes(utcDate.getMinutes() + 30);
+  return utcDate;
+};
 export const bookingController = () => {
   const keyId = process.env.RAZORPAY_KEY_ID;
   console.log(
@@ -350,26 +357,31 @@ export const bookingController = () => {
       }
     },
     bookedSlots: async (req: Request, res: Response, next: NextFunction) => {
+     
       const { courtId, date } = req.body;
+      let mainArray:string[][]=[]
       console.log(
         "🚀 ~ file: bookingController.ts:337 ~ bookedSlots: ~ date:",
         date
       );
       try {
+
         const startDate = new Date(date);
+        startDate.setUTCHours(18, 30, 0, 0);
         console.log(
-          "🚀 ~ file: bookingController.ts:340 ~ bookedSlots: ~ startDate:",
+          "🚀 ~ file: bookingController.ts:390 ~ bookingsByDate: ~ startDate:",
           startDate
         );
-        startDate.setHours(0, 0, 0, 0); // Start of the day
         const endDate = new Date(date);
-        endDate.setHours(23, 59, 59, 999); // End of the day
+        endDate.setUTCDate(endDate.getUTCDate() + 1); // Move to the next day
+        endDate.setUTCHours(18, 29, 59, 999);
 
         const dio = await Booking.aggregate([
           {
             $match: {
               courtId: new mongoose.Types.ObjectId(courtId),
               status: { $ne: "Cancelled" },
+              date: { $gte: new Date(startDate), $lt: new Date(endDate) },
             },
           },
           {
@@ -377,24 +389,15 @@ export const bookingController = () => {
               courtId: 1,
               startTime: 1,
               duration: 1,
-              year: { $year: "$date" },
-              month: { $month: "$date" },
-              day: { $dayOfMonth: "$date" },
-            },
-          },
-          {
-            $match: {
-              year: new Date(date).getFullYear(),
-              month: new Date(date).getMonth() + 1,
-              day: new Date(date).getDate(),
             },
           },
         ]);
 
+        
         console.log("🚀 ~ bookedSlots: ~ dio:", dio);
         // Collect all time slots into a single array
-        const allStartTimeSlots = dio.flatMap((booking) => {
-          return generateTimeSlots(booking.startTime, booking.duration).slice(
+        const allStartTimeSlots = dio.flatMap((booking: any) => {
+          return generateTimeSlots(booking.startTime, booking.duration,mainArray).slice(
             0,
             1
           ); // Only take the start time
