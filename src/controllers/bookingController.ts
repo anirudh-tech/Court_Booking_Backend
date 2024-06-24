@@ -157,10 +157,10 @@ export const bookingController = () => {
           if (booking?.paymentMethod == "Full Payment") {
             booking.paymentStatus = "Paid";
           } else {
-            booking.paymentStatus = "Advance Paid"
+            booking.paymentStatus = "Advance Paid";
           }
-          booking.status = "Booked"
-          booking.save()
+          booking.status = "Booked";
+          booking.save();
         }
         // await Booking.updateOne(
         //   { _id: new mongoose.Types.ObjectId(bookingId) },
@@ -355,6 +355,12 @@ export const bookingController = () => {
         "🚀 ~ file: bookingController.ts:337 ~ bookedSlots: ~ date:",
         date
       );
+      const istDateString = new Date(date).toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+      });
+
+      // Print the IST date string
+      console.log(istDateString);
       try {
         const startDate = new Date(date);
         console.log(
