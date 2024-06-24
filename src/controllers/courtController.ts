@@ -115,8 +115,6 @@ export const courtController = () => {
     },
     listAllcourts: async (req: Request, res: Response, next: NextFunction) => {
       try {
-        
-
         // const courts = await Court.find();
 
         const courts = await Court.aggregate([
@@ -184,7 +182,7 @@ export const courtController = () => {
       }
     },
     getCourtPrice: async () => {
-      
+
     },
   };
 };

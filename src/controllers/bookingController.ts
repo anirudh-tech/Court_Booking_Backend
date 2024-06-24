@@ -44,8 +44,12 @@ export const bookingController = () => {
           paymentMethod,
           userId,
           sport,
-          totalAmount
+          totalAmount,
         } = req.body;
+        console.log(
+          "🚀 ~ file: bookingController.ts:49 ~ bookCourt: ~ date:",
+          date
+        );
 
         courtId = new mongoose.Types.ObjectId(courtId);
         sport = new mongoose.Types.ObjectId(sport);
@@ -77,15 +81,18 @@ export const bookingController = () => {
         console.log("calling3");
 
         date = new Date(date);
-        date.setDate(date.getDate() + 1);
+        // date.setDate(date.getDate() + 1);
         console.log("calling4");
-        let paymentStatus;
-        if(paymentMethod === "Full Payment"){
-          paymentStatus = "Paid";
-        }else{
-          paymentStatus = "Advance Paid";
-        }
-        console.log("🚀 ~ file: bookingController.ts:124 ~ bookCourt: ~ paymentStatus:", paymentStatus)
+        console.log(
+          "🚀 ~ file: bookingController.ts:125 ~ bookCourt: ~ date:",
+          date
+        );
+        // let paymentStatus;
+        // if(paymentMethod === "Full Payment"){
+        //   paymentStatus = "Paid";
+        // }else{
+        //   paymentStatus = "Advance Paid";
+        // }
         const booking = await Booking.create({
           courtId,
           date,
@@ -94,10 +101,10 @@ export const bookingController = () => {
           userId,
           duration,
           amountPaid: amount,
-          paymentStatus,
+          paymentStatus: "Failed",
           paymentMethod,
-          status: "Booked",
-          totalAmount
+          status: "Not-Booked",
+          totalAmount,
         });
 
         const options = {
@@ -145,10 +152,20 @@ export const bookingController = () => {
         if (digest !== razorpaySignature) {
           throw new Error("Transaction is not legit!");
         }
-        await Booking.updateOne(
-          { _id: new mongoose.Types.ObjectId(bookingId) },
-          { $set: { status: "Booked" } }
-        );
+        const booking = await Booking.findById(bookingId);
+        if (booking) {
+          if (booking?.paymentMethod == "Full Payment") {
+            booking.paymentStatus = "Paid";
+          } else {
+            booking.paymentStatus = "Advance Paid"
+          }
+          booking.status = "Booked"
+          booking.save()
+        }
+        // await Booking.updateOne(
+        //   { _id: new mongoose.Types.ObjectId(bookingId) },
+        //   { $set: { status: "Booked" } }
+        // );
         const data = await Booking.findOne({ _id: bookingId });
         res.status(200).json({
           status: true,
@@ -251,10 +268,6 @@ export const bookingController = () => {
             User.find({}),
           ]);
           const courtNamesRegex = courts.map((court) => court.courtName);
-          console.log(
-            "🚀 ~ file: bookingController.ts:238 ~ bookingController ~ courtNamesRegex:",
-            courtNamesRegex
-          );
           const phoneNumbersRegex = users.map((user) => user.phoneNumber);
 
           const regexFilters = {
@@ -273,6 +286,7 @@ export const bookingController = () => {
               },
             ],
           };
+
           bookings = await Booking.aggregate([
             {
               $lookup: {
@@ -284,6 +298,17 @@ export const bookingController = () => {
             },
             {
               $unwind: "$courtId",
+            },
+            {
+              $lookup: {
+                from: "sports", // Use the collection name for the Sport model
+                localField: "courtId.sportId",
+                foreignField: "_id",
+                as: "courtId.sportId",
+              },
+            },
+            {
+              $unwind: "$courtId.sportId",
             },
             {
               $lookup: {
@@ -302,7 +327,12 @@ export const bookingController = () => {
           ]);
         } else {
           bookings = await Booking.find()
-            .populate("courtId")
+            .populate({
+              path: "courtId",
+              populate: {
+                path: "sportId",
+              },
+            })
             .populate("userId");
         }
 
@@ -321,8 +351,16 @@ export const bookingController = () => {
     },
     bookedSlots: async (req: Request, res: Response, next: NextFunction) => {
       const { courtId, date } = req.body;
+      console.log(
+        "🚀 ~ file: bookingController.ts:337 ~ bookedSlots: ~ date:",
+        date
+      );
       try {
         const startDate = new Date(date);
+        console.log(
+          "🚀 ~ file: bookingController.ts:340 ~ bookedSlots: ~ startDate:",
+          startDate
+        );
         startDate.setHours(0, 0, 0, 0); // Start of the day
         const endDate = new Date(date);
         endDate.setHours(23, 59, 59, 999); // End of the day
@@ -348,7 +386,7 @@ export const bookingController = () => {
             $match: {
               year: new Date(date).getFullYear(),
               month: new Date(date).getMonth() + 1,
-              day: new Date(date).getDate() + 1,
+              day: new Date(date).getDate(),
             },
           },
         ]);
