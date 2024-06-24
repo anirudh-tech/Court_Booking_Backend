@@ -30,10 +30,6 @@ export const loginController = () => {
         const { username, password } = req.body;
         const admin: any = await User.findOne({ username });
         if (admin) {
-          console.log(
-            "🚀 ~ file: loginController.ts:17 ~ adminLogin: ~ admin:",
-            admin
-          );
           const isMatch: boolean = await bcrypt.compare(
             password,
             admin.password
@@ -74,12 +70,10 @@ export const loginController = () => {
     userLogin: async (req: Request, res: Response, next: NextFunction) => {
       try {
         const { phoneNumber } = req.body;
-        console.log("🚀 ~ userLogin: ~ token:", req.headers["authorization"]);
         const token = req?.headers?.["authorization"] as string;
         const secretToken = process.env.ACCESS_TOKEN_SECRET;
         if (secretToken) {
           const verified = decodeJWT(token);
-          console.log("🚀 ~ userLogin: ~ verified:", verified.payload);
           let user;
           if (verified) {
             user = await User.findOne({ phoneNumber });

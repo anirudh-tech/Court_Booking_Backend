@@ -17,15 +17,8 @@ const convertUTCToIST = (date: Date) => {
 };
 export const bookingController = () => {
   const keyId = process.env.RAZORPAY_KEY_ID;
-  console.log(
-    "🚀 ~ file: bookingController.ts:10 ~ bookingController ~ keyId:",
-    keyId
-  );
   const keySecret = process.env.RAZORPAY_SECRET;
-  console.log(
-    "🚀 ~ file: bookingController.ts:12 ~ bookingController ~ keySecret:",
-    keySecret
-  );
+
 
   if (!keyId || !keySecret) {
     throw new Error(
@@ -40,7 +33,6 @@ export const bookingController = () => {
   return {
     bookCourt: async (req: Request, res: Response, next: NextFunction) => {
       try {
-        console.log("Calling 1");
         let {
           courtId,
           date,
@@ -53,14 +45,10 @@ export const bookingController = () => {
           sport,
           totalAmount,
         } = req.body;
-        console.log(
-          "🚀 ~ file: bookingController.ts:49 ~ bookCourt: ~ date:",
-          date
-        );
+
 
         courtId = new mongoose.Types.ObjectId(courtId);
         sport = new mongoose.Types.ObjectId(sport);
-        console.log("Calling ", req.body);
         // const sport = await Sport.findById(sportId);
         // if (!sport) {
         //   return res.status(404).json({
@@ -85,15 +73,9 @@ export const bookingController = () => {
           });
         }
 
-        console.log("calling3");
 
         date = new Date(date);
         // date.setDate(date.getDate() + 1);
-        console.log("calling4");
-        console.log(
-          "🚀 ~ file: bookingController.ts:125 ~ bookCourt: ~ date:",
-          date
-        );
         // let paymentStatus;
         // if(paymentMethod === "Full Payment"){
         //   paymentStatus = "Paid";
@@ -121,7 +103,6 @@ export const bookingController = () => {
         };
         const order = await razorpay.orders.create(options);
         const bookingId = booking._id;
-        console.log("🚀 ~ bookCourt: ~ order:", order);
         if (!order) {
           throw new Error("Razorpay order err");
         }
@@ -132,7 +113,6 @@ export const bookingController = () => {
           message: "Order created",
         });
       } catch (error) {
-        console.log("🚀 ~ bookCourt: ~ error:", error);
         next(error);
       }
     },
@@ -143,10 +123,6 @@ export const bookingController = () => {
       next: NextFunction
     ) => {
       try {
-        console.log(
-          "🚀 ~ file: bookingController.ts:114 ~ bookingController ~ req.body:",
-          req.body
-        );
         const {
           razorpayOrderId,
           razorpayPaymentId,
@@ -224,7 +200,6 @@ export const bookingController = () => {
             $unwind: "$sportDetails",
           },
         ]);
-        console.log("🚀 ~ bookingController ~ bookings:", bookings);
         if (bookings) {
           res.json({
             success: true,
@@ -360,18 +335,10 @@ export const bookingController = () => {
      
       const { courtId, date } = req.body;
       let mainArray:string[][]=[]
-      console.log(
-        "🚀 ~ file: bookingController.ts:337 ~ bookedSlots: ~ date:",
-        date
-      );
       try {
 
         const startDate = new Date(date);
         startDate.setUTCHours(18, 30, 0, 0);
-        console.log(
-          "🚀 ~ file: bookingController.ts:390 ~ bookingsByDate: ~ startDate:",
-          startDate
-        );
         const endDate = new Date(date);
         endDate.setUTCDate(endDate.getUTCDate() + 1); // Move to the next day
         endDate.setUTCHours(18, 29, 59, 999);
@@ -394,13 +361,11 @@ export const bookingController = () => {
         ]);
 
         
-        console.log("🚀 ~ bookedSlots: ~ dio:", dio);
-        // Collect all time slots into a single array
         const allStartTimeSlots = dio.flatMap((booking: any) => {
           return generateTimeSlots(booking.startTime, booking.duration,mainArray).slice(
             0,
             1
-          ); // Only take the start time
+          ); 
         });
 
         // Remove duplicates and sort the slots
@@ -410,10 +375,6 @@ export const bookingController = () => {
             const dateB = new Date(`1970-01-01T${b}`);
             return dateA.getTime() - dateB.getTime();
           }
-        );
-        console.log(
-          "🚀 ~ bookedSlots: ~ uniqueSortedSlots:",
-          mainArray.flat(Infinity)
         );
 
         return res.status(200).json({
@@ -485,20 +446,13 @@ export const bookingController = () => {
       next: NextFunction
     ) => {
       const { bookingId, value: paymentStatus } = req.body;
-      console.log(
-        "🚀 ~ file: bookingController.ts:353 ~ updatePaymentMethod: ~ req.body:",
-        req.body
-      );
       try {
         const result = await Booking.updateOne(
           { _id: bookingId },
           { $set: { paymentStatus } },
           { new: true }
         );
-        console.log(
-          "🚀 ~ file: bookingController.ts:360 ~ updatePaymentMethod: ~ result:",
-          result
-        );
+
 
         const data = await Booking.find()
           .populate("courtId")
@@ -519,18 +473,12 @@ export const bookingController = () => {
         // startDate.setDate(startDate.getDate() + 1);
         const startDate = new Date(date);
         startDate.setUTCHours(18, 30, 0, 0);
-        console.log(
-          "🚀 ~ file: bookingController.ts:390 ~ bookingsByDate: ~ startDate:",
-          startDate
-        );
+ 
         const endDate = new Date(date);
         endDate.setUTCDate(endDate.getUTCDate() + 1); // Move to the next day
         endDate.setUTCHours(18, 29, 59, 999);
         // endDate.setDate(endDate.getDate() + 1);
-        console.log(
-          "🚀 ~ file: bookingController.ts:482 ~ bookingsByDate: ~ endDate:",
-          endDate
-        );
+
         const bookings = await Booking.find({
           date: {
             $gte: startDate,
@@ -545,10 +493,6 @@ export const bookingController = () => {
             },
           })
           .populate("userId");
-        console.log(
-          "🚀 ~ file: bookingController.ts:394 ~ bookingController ~ bookings:",
-          bookings
-        );
         if (!bookings) {
           throw new Error("Cannot find booked slots in this date");
         } else {

@@ -15,7 +15,6 @@ export const verifyAdminToken = (
         if (error) {
           throw new Error(error.message);
         } else {
-          console.log(decoded, "----=====----");
           if (decoded!.role == "admin") {
             req.body._id = decoded._id;
           } else {
