@@ -7,6 +7,8 @@ import { User } from "../model/userSchema";
 import crypto from "crypto";
 import mongoose from "mongoose";
 import { generateTimeSlots } from "../utils/generateTimeslot";
+import nodemailer from "nodemailer";
+import { EMAIL, PASSWORD } from "../config/envConfig/config";
 import { format } from "date-fns";
 
 const convertUTCToIST = (date: Date) => {
@@ -18,7 +20,6 @@ const convertUTCToIST = (date: Date) => {
 export const bookingController = () => {
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_SECRET;
-
 
   if (!keyId || !keySecret) {
     throw new Error(
@@ -46,7 +47,6 @@ export const bookingController = () => {
           totalAmount,
         } = req.body;
 
-
         courtId = new mongoose.Types.ObjectId(courtId);
         sport = new mongoose.Types.ObjectId(sport);
         // const sport = await Sport.findById(sportId);
@@ -72,7 +72,6 @@ export const bookingController = () => {
             message: "User not found",
           });
         }
-
 
         date = new Date(date);
         // date.setDate(date.getDate() + 1);
@@ -149,7 +148,50 @@ export const bookingController = () => {
         //   { _id: new mongoose.Types.ObjectId(bookingId) },
         //   { $set: { status: "Booked" } }
         // );
-        const data = await Booking.findOne({ _id: bookingId });
+        const data:any = await Booking.findOne({ _id: bookingId }).populate("courtId").populate("userId");
+
+        // NodeMailer code
+        const transporter = nodemailer.createTransport({
+          port: 465,
+          service: "Gmail",
+          auth: {
+            user: EMAIL,
+            pass: PASSWORD,
+          },
+          secure: true,
+        });
+        const bookingDetailsHtml = `
+          <h2>New Booking Received</h2>
+          <p>Dear Turf Owner,</p>
+          <p>A new booking has been made. Here are the details:</p>
+          <ul>
+          <li><strong>Customer Detail:</strong> ${data?.userId?.phoneNumber}</li>
+          <li><strong>Date:</strong> ${data.date}</li>
+          <li><strong>Time:</strong> ${data.startTime} to ${data.endTime}</li>
+          <li><strong>Court Number:</strong> ${data.courtId.courtName}</li>
+          </ul>
+          <p>Please ensure the court is ready for the customer at the specified time.</p>
+          <p>Lal Sports Academy</p>
+          `;
+
+        const mailData = {
+          from: "tickerpage@gmail.com",
+          to: "Lalsportsacademy@gmail.com",
+          subject: "OTP FROM LALSPORTS BOOKING",
+          html: bookingDetailsHtml,
+        };
+
+        const result = transporter.sendMail(mailData, (error, info) => {
+          return new Promise((resolve, reject) => {
+            if (error) {
+              console.log("Error occurred while sending the", error);
+              reject(false);
+            } else {
+              resolve(true);
+            }
+          });
+        });
+
         res.status(200).json({
           status: true,
           data,
@@ -332,11 +374,9 @@ export const bookingController = () => {
       }
     },
     bookedSlots: async (req: Request, res: Response, next: NextFunction) => {
-     
       const { courtId, date } = req.body;
-      let mainArray:string[][]=[]
+      let mainArray: string[][] = [];
       try {
-
         const startDate = new Date(date);
         startDate.setUTCHours(18, 30, 0, 0);
         const endDate = new Date(date);
@@ -360,12 +400,12 @@ export const bookingController = () => {
           },
         ]);
 
-        
         const allStartTimeSlots = dio.flatMap((booking: any) => {
-          return generateTimeSlots(booking.startTime, booking.duration,mainArray).slice(
-            0,
-            1
-          ); 
+          return generateTimeSlots(
+            booking.startTime,
+            booking.duration,
+            mainArray
+          ).slice(0, 1);
         });
 
         // Remove duplicates and sort the slots
@@ -453,7 +493,6 @@ export const bookingController = () => {
           { new: true }
         );
 
-
         const data = await Booking.find()
           .populate("courtId")
           .populate("userId");
@@ -473,7 +512,7 @@ export const bookingController = () => {
         // startDate.setDate(startDate.getDate() + 1);
         const startDate = new Date(date);
         startDate.setUTCHours(18, 30, 0, 0);
- 
+
         const endDate = new Date(date);
         endDate.setUTCDate(endDate.getUTCDate() + 1); // Move to the next day
         endDate.setUTCHours(18, 29, 59, 999);
