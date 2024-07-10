@@ -4,7 +4,6 @@ export const verifyToken = (token: string) => {
         if (error) {
             throw new Error(error.message);
         } else {
-            console.log(decoded,'----=====----')
             return decoded 
         }
     })

@@ -5,7 +5,6 @@ export const verifyUserToken = (token: string) => <IDecodedInterface> <unknown>{
         if (error) {
             throw new Error(error.message);
         } else {
-            console.log(decoded, '----=====----');
             return decoded as IDecodedInterface;
         }
     })
