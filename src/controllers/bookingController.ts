@@ -148,7 +148,7 @@ export const bookingController = () => {
         //   { _id: new mongoose.Types.ObjectId(bookingId) },
         //   { $set: { status: "Booked" } }
         // );
-        const data:any = await Booking.findOne({ _id: bookingId }).populate("courtId").populate("userId");
+        const data: any = await Booking.findOne({ _id: bookingId }).populate("courtId").populate("userId");
 
         // NodeMailer code
         const transporter = nodemailer.createTransport({
@@ -268,7 +268,7 @@ export const bookingController = () => {
           date,
           paymentStatus: { $ne: "Failed" }
         });
-    
+
         if (bookedSlots.length === 0) { // Modify this condition to check for an empty array
           throw new Error("Cannot find booked slots on this date");
         } else {
@@ -282,7 +282,7 @@ export const bookingController = () => {
         next(error);
       }
     },
-    
+
 
     listAllBookings: async (
       req: Request,
@@ -293,16 +293,16 @@ export const bookingController = () => {
         const { search } = req.query;
         let bookings;
         const bookingStatusFilter = { paymentStatus: { $ne: "Failed" } };
-    
+
         if (search) {
           const [courts, users] = await Promise.all([
             Court.find({}),
             User.find({}),
           ]);
-    
+
           const courtNamesRegex = courts.map((court) => court.courtName);
           const phoneNumbersRegex = users.map((user) => user.phoneNumber);
-    
+
           const regexFilters = {
             $or: [
               {
@@ -319,7 +319,7 @@ export const bookingController = () => {
               },
             ],
           };
-    
+
           bookings = await Booking.aggregate([
             {
               $lookup: {
@@ -360,7 +360,7 @@ export const bookingController = () => {
                 paymentStatus: { $ne: "Failed" }, // Add filter for booking status
               },
             },
-          ]);
+          ]).sort({ createdAt: -1 })
         } else {
           bookings = await Booking.find(bookingStatusFilter)
             .populate({
@@ -369,9 +369,9 @@ export const bookingController = () => {
                 path: "sportId",
               },
             })
-            .populate("userId");
+            .populate("userId").sort({ createdAt: -1 })
         }
-    
+
         if (!bookings) {
           throw new Error("No bookings found");
         } else {
@@ -385,7 +385,7 @@ export const bookingController = () => {
         next(error);
       }
     },
-    
+
     bookedSlots: async (req: Request, res: Response, next: NextFunction) => {
       const { courtId, date } = req.body;
       let mainArray: string[][] = [];
@@ -537,7 +537,7 @@ export const bookingController = () => {
             $lte: endDate,
           },
           status: { $ne: "Cancelled" },
-          paymentStatus: {$ne: "Failed"}
+          paymentStatus: { $ne: "Failed" }
         })
           .populate({
             path: "courtId",
