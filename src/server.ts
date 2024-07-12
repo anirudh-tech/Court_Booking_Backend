@@ -33,7 +33,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 app.listen(PORT, async() => {
   // await Booking.deleteMany({})
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port  ${PORT}`);
   
 });
 

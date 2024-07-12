@@ -524,6 +524,7 @@ export const bookingController = () => {
             $lte: endDate,
           },
           status: { $ne: "Cancelled" },
+          paymentStatus: {$ne: "Failed"}
         })
           .populate({
             path: "courtId",
