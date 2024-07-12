@@ -266,7 +266,7 @@ export const bookingController = () => {
         const bookedSlots = await Booking.find({
           courtId,
           date,
-          bookingStatus: { $ne: "Failed" }
+          paymentStatus: { $ne: "Failed" }
         });
     
         if (bookedSlots.length === 0) { // Modify this condition to check for an empty array
@@ -292,7 +292,7 @@ export const bookingController = () => {
       try {
         const { search } = req.query;
         let bookings;
-        const bookingStatusFilter = { bookingStatus: { $ne: "Failed" } };
+        const bookingStatusFilter = { paymentStatus: { $ne: "Failed" } };
     
         if (search) {
           const [courts, users] = await Promise.all([
@@ -357,7 +357,7 @@ export const bookingController = () => {
             {
               $match: {
                 ...regexFilters,
-                bookingStatus: { $ne: "Failed" }, // Add filter for booking status
+                paymentStatus: { $ne: "Failed" }, // Add filter for booking status
               },
             },
           ]);
