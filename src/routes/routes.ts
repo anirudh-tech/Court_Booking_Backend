@@ -24,7 +24,8 @@ export const routes = () => {
     listAllBookings,
     bookedSlots,
     updatePaymentMethod,
-    bookingsByDate
+    bookingsByDate,
+    deleteBooking
   } = bookingController();
   const { fetchData } = userController();
   const router = Router();
@@ -60,6 +61,7 @@ export const routes = () => {
   router.route("/booked-slots").post(bookedSlots);
   router.route("/update-payment-status").post(updatePaymentMethod);
   router.route("/bookings-by-date").post(bookingsByDate);
+  router.route("/delete-booking/:id").delete(deleteBooking);
 
 
 

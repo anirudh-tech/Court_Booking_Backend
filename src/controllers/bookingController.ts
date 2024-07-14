@@ -583,5 +583,18 @@ export const bookingController = () => {
         next(error);
       }
     },
+
+    deleteBooking: async(req: Request, res: Response, next:NextFunction) => {
+      try {
+        const {id} = req.params;
+        await Booking.deleteOne({_id:id})
+        res.status(200).json({
+          status: true,
+          message:"Booking Deleted Successfully"
+        })
+      } catch (error) {
+        next(error)
+      }
+    }
   };
 };
