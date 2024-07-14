@@ -198,8 +198,8 @@ export const bookingController = () => {
 
         const mailData = {
           from: "tickerpage@gmail.com",
-          // to: "Lalsportsacademy@gmail.com",
-          to: "anirudhjagath43@gmail.com",
+          to: "Lalsportsacademy@gmail.com",
+          // to: "anirudhjagath43@gmail.com",
           subject: "OTP FROM LALSPORTS BOOKING",
           html: bookingDetailsHtml,
         };
