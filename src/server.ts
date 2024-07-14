@@ -5,6 +5,7 @@ import { routes } from "./routes/routes";
 import cors from "cors";
 import { Court } from "./model/courtSchema";
 import { Booking } from "./model/bookingSchema";
+import { cleanUpFailedBookings } from "./utils/cleanUpFailedBookings";
 dotenv.config();
 
 const app: Application = express();
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.use(cleanUpFailedBookings);
 app.use("/api", routes());
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

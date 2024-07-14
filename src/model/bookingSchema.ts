@@ -35,7 +35,6 @@ const BookingSchema = new Schema(
     },
     amountPaid: {
       type: Number,
-      required: true,
     },
     paymentStatus: {
       type: String,

@@ -81,36 +81,58 @@ export const bookingController = () => {
         // }else{
         //   paymentStatus = "Advance Paid";
         // }
-        const booking = await Booking.create({
-          courtId,
-          date,
-          startTime,
-          endTime,
-          userId,
-          duration,
-          amountPaid: amount,
-          paymentStatus: "Failed",
-          paymentMethod,
-          status: "Not-Booked",
-          totalAmount,
-        });
 
-        const options = {
-          amount: amount * 100,
-          currency: "INR",
-          receipt: `#${booking._id}`,
-        };
-        const order = await razorpay.orders.create(options);
-        const bookingId = booking._id;
-        if (!order) {
-          throw new Error("Razorpay order err");
+        if (user.role === "Admin") {
+          const booking = await Booking.create({
+            courtId,
+            date,
+            startTime,
+            endTime,
+            userId,
+            duration,
+            paymentStatus: "Booked By Admin",
+            status: "Booked",
+          });
+
+          return res.json({
+            status: true,
+            booking,
+            message: "Court Booked",
+          });
+
+        } else {
+          const booking = await Booking.create({
+            courtId,
+            date,
+            startTime,
+            endTime,
+            userId,
+            duration,
+            amountPaid: amount,
+            paymentStatus: "Failed",
+            paymentMethod,
+            status: "Not-Booked",
+            totalAmount,
+          });
+
+          const options = {
+            amount: amount * 100,
+            currency: "INR",
+            receipt: `#${booking._id}`,
+          };
+          const order = await razorpay.orders.create(options);
+          const bookingId = booking._id;
+          if (!order) {
+            throw new Error("Razorpay order err");
+          }
+          return res.json({
+            status: true,
+            order,
+            bookingId,
+            message: "Order created",
+          });
         }
-        return res.json({
-          status: true,
-          order,
-          bookingId,
-          message: "Order created",
-        });
+
       } catch (error) {
         next(error);
       }
@@ -176,7 +198,8 @@ export const bookingController = () => {
 
         const mailData = {
           from: "tickerpage@gmail.com",
-          to: "Lalsportsacademy@gmail.com",
+          // to: "Lalsportsacademy@gmail.com",
+          to: "anirudhjagath43@gmail.com",
           subject: "OTP FROM LALSPORTS BOOKING",
           html: bookingDetailsHtml,
         };
@@ -217,6 +240,7 @@ export const bookingController = () => {
           {
             $match: {
               userId: new mongoose.Types.ObjectId(id),
+              paymentStatus: {$ne:"Failed"}
             },
           },
           {

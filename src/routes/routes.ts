@@ -61,5 +61,7 @@ export const routes = () => {
   router.route("/update-payment-status").post(updatePaymentMethod);
   router.route("/bookings-by-date").post(bookingsByDate);
 
+
+
   return router;
 };
