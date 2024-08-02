@@ -109,7 +109,7 @@ export const bookingController = () => {
             userId,
             duration,
             amountPaid: amount,
-            paymentStatus: "Failed",
+            paymentStatus: "Pending",
             paymentMethod,
             status: "Not-Booked",
             totalAmount,
@@ -143,20 +143,20 @@ export const bookingController = () => {
       res: Response,
       next: NextFunction
     ) => {
+      const {
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpaySignature,
+        bookingId,
+      } = req.body;
+      const booking = await Booking.findById(bookingId);
       try {
-        const {
-          razorpayOrderId,
-          razorpayPaymentId,
-          razorpaySignature,
-          bookingId,
-        } = req.body;
         const sha = crypto.createHmac("sha256", keySecret);
         sha.update(`${razorpayOrderId}|${razorpayPaymentId}`);
         const digest = sha.digest("hex");
         if (digest !== razorpaySignature) {
           throw new Error("Transaction is not legit!");
         }
-        const booking = await Booking.findById(bookingId);
         if (booking) {
           if (booking?.paymentMethod == "Full Payment") {
             booking.paymentStatus = "Paid";
@@ -221,6 +221,10 @@ export const bookingController = () => {
           message: "Payment successful",
         });
       } catch (error) {
+        if(booking){
+          booking.paymentStatus = "Paid";
+          booking.save();
+        }
         next(error);
       }
     },
