@@ -6,6 +6,7 @@ import cors from "cors";
 import { Court } from "./model/courtSchema";
 import { Booking } from "./model/bookingSchema";
 import { cleanUpFailedBookings } from "./utils/cleanUpFailedBookings";
+import cron from "node-cron";
 dotenv.config();
 
 const app: Application = express();
@@ -24,6 +25,25 @@ app.use(cookieParser());
 
 app.use(cleanUpFailedBookings);
 app.use("/api", routes());
+
+const checkAndDeletePendingBookings = async () => {
+  try {
+    const pendingBookings = await Booking.find({ paymentStatus: "Pending" });
+    await Booking.deleteMany({ paymentStatus: "Pending" });
+    console.log(`Deleted ${pendingBookings.length} pending bookings`);
+  } catch (err) {
+    console.error('Error deleting pending bookings:', err);
+  }
+};
+
+// Schedule the task to run every minute
+cron.schedule('* * * * *', () => {
+  checkAndDeletePendingBookings();
+});
+
+// Also run the task every 30 seconds using setInterval
+setInterval(checkAndDeletePendingBookings, 30000);
+
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
