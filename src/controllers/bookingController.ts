@@ -429,6 +429,7 @@ export const bookingController = () => {
             $match: {
               courtId: new mongoose.Types.ObjectId(courtId),
               status: { $ne: "Cancelled" },
+              paymentStatus: { $nin: ["Failed", "Pending"] },
               date: { $gte: new Date(startDate), $lt: new Date(endDate) },
             },
           },
