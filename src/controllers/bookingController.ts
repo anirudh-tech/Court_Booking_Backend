@@ -221,7 +221,7 @@ export const bookingController = () => {
           message: "Payment successful",
         });
       } catch (error) {
-        if(booking){
+        if (booking) {
           booking.paymentStatus = "Paid";
           booking.save();
         }
@@ -244,7 +244,7 @@ export const bookingController = () => {
           {
             $match: {
               userId: new mongoose.Types.ObjectId(id),
-              paymentStatus: {$ne:"Failed"}
+              paymentStatus: { $nin: ["Failed", "Pending"] }
             },
           },
           {
@@ -294,7 +294,7 @@ export const bookingController = () => {
         const bookedSlots = await Booking.find({
           courtId,
           date,
-          paymentStatus: { $ne: "Failed" }
+          paymentStatus: { $nin: ["Failed", "Pending"] }
         });
 
         if (bookedSlots.length === 0) { // Modify this condition to check for an empty array
@@ -320,7 +320,7 @@ export const bookingController = () => {
       try {
         const { search } = req.query;
         let bookings;
-        const bookingStatusFilter = { paymentStatus: { $ne: "Failed" } };
+        const bookingStatusFilter = { paymentStatus: { $nin: ["Failed", "Pending"] } };
 
         if (search) {
           const [courts, users] = await Promise.all([
@@ -477,7 +477,10 @@ export const bookingController = () => {
         const { userId } = req.params;
         const booking = await Booking.aggregate([
           {
-            $match: { userId: new mongoose.Types.ObjectId(userId) },
+            $match: {
+              userId: new mongoose.Types.ObjectId(userId),
+              paymentStatus: { $nin: ["Failed", "Pending"] }
+            },
           },
           {
             $lookup: {
@@ -565,7 +568,7 @@ export const bookingController = () => {
             $lte: endDate,
           },
           status: { $ne: "Cancelled" },
-          paymentStatus: { $ne: "Failed" }
+          paymentStatus: { $nin: ["Failed", "Pending"] }
         })
           .populate({
             path: "courtId",
@@ -588,13 +591,13 @@ export const bookingController = () => {
       }
     },
 
-    deleteBooking: async(req: Request, res: Response, next:NextFunction) => {
+    deleteBooking: async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const {id} = req.params;
-        await Booking.deleteOne({_id:id})
+        const { id } = req.params;
+        await Booking.deleteOne({ _id: id })
         res.status(200).json({
           status: true,
-          message:"Booking Deleted Successfully"
+          message: "Booking Deleted Successfully"
         })
       } catch (error) {
         next(error)
