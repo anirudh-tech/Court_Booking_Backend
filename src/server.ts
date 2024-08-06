@@ -37,12 +37,12 @@ const checkAndDeletePendingBookings = async () => {
 };
 
 // Schedule the task to run every minute
-cron.schedule('* * * * *', () => {
-  checkAndDeletePendingBookings();
-});
+// cron.schedule('* * * * *', () => {
+//   checkAndDeletePendingBookings();
+// });
 
 // Also run the task every 30 seconds using setInterval
-setInterval(checkAndDeletePendingBookings, 30000);
+// setInterval(checkAndDeletePendingBookings, 30000);
 
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
